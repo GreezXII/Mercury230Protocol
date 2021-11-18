@@ -5,8 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Mercury230Protocol"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Протокол Меркурий 230" Height="450" Width="Auto">
+    <Window.Resources>
+        <Style x:Key="Default">
+            <Setter Property="Control.Margin" Value="10"></Setter>
+            <Setter Property="Control.FontSize" Value="40"></Setter>
+        </Style>
+    </Window.Resources>
     <Grid>
-
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="Auto"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Label Content="HEX значение" Grid.Row="0" Grid.Column="0" Style="{StaticResource Default}"></Label>
+        <TextBox x:Name="hexTXT" Grid.Row="0" Grid.Column="1" Width="400" Style="{StaticResource Default}"></TextBox>
+        <Label Content="Результат: " Grid.Row="1" Grid.Column="0" Style="{StaticResource Default}"></Label>
+        <Label x:Name="ResultLBL" Content="" Grid.Row="1" Grid.Column="1" Style="{StaticResource Default}"></Label>
+        <Button x:Name="ApplyBTN" Content="Вычислить" Grid.Row="2" Grid.Column="1" Style="{StaticResource Default}" Click="ApplyBTN_Click"></Button>
     </Grid>
 </Window>
