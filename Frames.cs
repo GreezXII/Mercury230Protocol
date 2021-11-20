@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Mercury230Protocol
 {
-    enum RequestTypes
+    enum RequestTypes : byte
     {
         TestLink = 0x00,        // Тестирование канала связи
         OpenConnection = 0x01,  // Запрос на открытие канала связи
         CloseConnection = 0x02, // Запрос на закрытие канала связи
     }
 
-    enum AccessLevel
+    enum MeterAccessLevel : byte
     {
         User = 0x01,
         Admin = 0x02
@@ -21,6 +20,13 @@ namespace Mercury230Protocol
     {
         public byte Address { get; set; }
         public byte[] Body { get; set; }
+        public Frame() { }
+        public Frame(byte addr, byte[] body)
+        {
+            // Проверка ввода
+            Address = addr;
+            Body = body;
+        }
         public byte[] CalculateCRC16Modbus(byte[] buffer)
         {
             ushort crc = 0xFFFF;
@@ -40,6 +46,9 @@ namespace Mercury230Protocol
                         crc >>= 1;
                 }
             }
+            //byte lowByteCRC = (byte)((crc << 8) >> 8);
+            //byte highByteCRC = (byte)(crc >> 8);
+            //return new byte[] { highByteCRC, lowByteCRC };
             return BitConverter.GetBytes(crc);
         }
         public byte[] Create()
@@ -49,7 +58,6 @@ namespace Mercury230Protocol
             frame.AddRange(Body);
             byte[] crc = CalculateCRC16Modbus(frame.ToArray());
             frame.AddRange(crc);
-
             return frame.ToArray();
         }
     }

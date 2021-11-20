@@ -23,7 +23,7 @@
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Label Content="HEX значение" Grid.Row="0" Grid.Column="0" Style="{StaticResource Default}"></Label>
-        <TextBox x:Name="hexTXT" Grid.Row="0" Grid.Column="1" Width="400" Style="{StaticResource Default}"></TextBox>
+        <TextBox x:Name="hexTXT" Grid.Row="0" Grid.Column="1" Width="600" Style="{StaticResource Default}"></TextBox>
         <Label Content="Результат: " Grid.Row="1" Grid.Column="0" Style="{StaticResource Default}"></Label>
         <Label x:Name="ResultLBL" Content="" Grid.Row="1" Grid.Column="1" Style="{StaticResource Default}"></Label>
         <Button x:Name="ApplyBTN" Content="Вычислить" Grid.Row="2" Grid.Column="1" Style="{StaticResource Default}" Click="ApplyBTN_Click"></Button>
