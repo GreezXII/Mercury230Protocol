@@ -28,22 +28,26 @@ namespace Mercury230Protocol
             Password = pwd;
             Port.Open();
         }
-        public void TestConnection()
+        public async void TestConnection()
         {
-            //Port.Open();
             byte[] request = { 0x00 };
             Frame f = new Frame(Address, request);
             byte[] buffer = f.Create();
             Print(buffer);
             Port.Write(buffer, 0, buffer.Length);
-            Port.DataReceived += new SerialDataReceivedEventHandler(Read);
+            byte[] result = await ReadAsync();
+            Print(result);
         }
 
-        private void Read(object sender, SerialDataReceivedEventArgs e)
+        private async Task<byte[]> ReadAsync()
         {
-            byte[] buffer = new byte[Port.BytesToRead];
-            Port.Read(buffer, 0, buffer.Length);
-            Print(buffer);
+            return await Task.Run(() =>
+                {
+                    Thread.Sleep(WaitAnswerTime);
+                    byte[] buffer = new byte[Port.BytesToRead];
+                    Port.Read(buffer, 0, buffer.Length);
+                    return buffer;
+                });
         }
 
         private void Print(byte[] array)
@@ -53,6 +57,7 @@ namespace Mercury230Protocol
                 string a = Convert.ToString(b, 16);
                 Trace.Write($"{a} ");
             }
+            Trace.WriteLine("");
         }
     }
 }
