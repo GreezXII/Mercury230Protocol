@@ -30,29 +30,12 @@ namespace Mercury230Protocol
         }
         public async void TestConnection()
         {
-            //byte[] request = { 0x00 };
-            //Frame requestFrame = new Frame(Address, request);
+            Frame requestFrame1 = new Frame(Address, new byte[] { 0x00 });
+            Frame requestFrame2 = new Frame(Address, new byte[] { 0x01 });
+            bool result = Frame.CRCMatch(requestFrame1, requestFrame2);
+            Trace.WriteLine(result);
             //await WriteAsync(requestFrame);
-
             //Frame responseFrame = await ReadAsync();
-
-            Frame f1 = new Frame(new byte[] { 89, 0x00, 0x3b, 0x0f });
-            Frame f2 = new Frame(new byte[] { 89, 0x00, 0x3b, 0x0f });
-            Frame f3 = new Frame(new byte[] { 90, 0x00, 0x3b, 0x0f });
-            Frame f4 = new Frame(new byte[] { 89, 0x01, 0x3b, 0x0f });
-
-            f1.Print();
-            f2.Print();
-            Trace.WriteLine($"f1 == f2 -> {f1 == f2}");
-            Trace.WriteLine($"f1 != f2 -> {f1 != f2}");
-
-            f3.Print();
-            Trace.WriteLine($"f1 == f3 -> {f1 == f3}");
-            Trace.WriteLine($"f1 != f3 -> {f1 != f3}");
-
-            f4.Print();
-            Trace.WriteLine($"f1 == f4 -> {f1 == f4}");
-            Trace.WriteLine($"f1 != f4 -> {f1 != f4}");
         }
 
         private async Task WriteAsync(Frame f)

@@ -102,6 +102,17 @@ namespace Mercury230Protocol
             CRC = BitConverter.GetBytes(crc);
             return CRC;
         }
+        public static bool CRCMatch(Frame a, Frame b)
+        {
+            if (a.CRC.Length != b.CRC.Length)
+                return false;
+
+            for (int i = 0; i < a.CRC.Length; i++)
+                if (a.CRC[i] != b.CRC[i])
+                    return false;
+
+            return true;
+        }
         public byte[] ToArray()
         {
             List<byte> frame = new List<byte>();
