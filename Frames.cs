@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Mercury230Protocol
 {
@@ -18,17 +19,69 @@ namespace Mercury230Protocol
 
     class Frame
     {
-        public byte Address { get; set; }
-        public byte[] Body { get; set; }
-        public Frame() { }
+        public byte Address { get; private set; }
+        public byte[] Body { get; private set; }
+        public byte[] CRC { get; private set; }
+        public int Length { get; private set; }
         public Frame(byte addr, byte[] body)
         {
             // Проверка ввода
             Address = addr;
             Body = body;
+            CRC = CalculateCRC16Modbus();
+            Length = Body.Length + CRC.Length + 1;
         }
-        public byte[] CalculateCRC16Modbus(byte[] buffer)
+        public Frame(byte[] array)
         {
+            Length = array.Length;
+            // Адрес счётчика
+            Address = array[0];
+            // Тело запроса
+            byte[] b = new byte[Length - 3];  // Исключить адрес счётчика и CRC
+            for (int i = 0; i < Length - 3; i++)
+            {
+                b[i] = array[i + 1];
+            }
+            Body = b;
+            // CRC
+            byte[] crc = { array[Length - 2], array[Length - 1] };
+            CRC = crc;
+        }
+        public static bool operator == (Frame a, Frame b)
+        {
+            if (a.Length != b.Length)
+                return false;
+
+            byte[] b1 = a.ToArray();
+            byte[] b2 = b.ToArray();
+
+            for (int i = 0; i < a.Length; i++)
+                if (b1[i] != b2[i])
+                    return false;
+            
+            return true;
+        }
+        public static bool operator !=(Frame a, Frame b)
+        {
+            if (a.Length != b.Length)
+                return true;
+
+            byte[] b1 = a.ToArray();
+            byte[] b2 = b.ToArray();
+
+            for (int i = 0; i < a.Length; i++)
+                if (b1[i] != b2[i])
+                    return true;
+
+            return false;
+        }
+        private byte[] CalculateCRC16Modbus()
+        {
+            List<byte> frameFields = new List<byte>();
+            frameFields.Add(Address);
+            frameFields.AddRange(Body);
+            byte[] buffer = frameFields.ToArray();
+
             ushort crc = 0xFFFF;
 
             for (int pos = 0; pos < buffer.Length; pos++)
@@ -46,19 +99,28 @@ namespace Mercury230Protocol
                         crc >>= 1;
                 }
             }
-            //byte lowByteCRC = (byte)((crc << 8) >> 8);
-            //byte highByteCRC = (byte)(crc >> 8);
-            //return new byte[] { highByteCRC, lowByteCRC };
-            return BitConverter.GetBytes(crc);
+            CRC = BitConverter.GetBytes(crc);
+            return CRC;
         }
-        public byte[] Create()
+        public byte[] ToArray()
         {
             List<byte> frame = new List<byte>();
             frame.Add(Address);
             frame.AddRange(Body);
-            byte[] crc = CalculateCRC16Modbus(frame.ToArray());
-            frame.AddRange(crc);
+            frame.AddRange(CRC);
             return frame.ToArray();
+        }
+        public void Print()
+        {
+            Trace.WriteLine($"Address: {Address}");
+            Trace.Write($"Body: ");
+            foreach (byte b in Body)
+                Trace.Write($"{b}");
+            Trace.WriteLine("");
+            Trace.Write($"CRC: ");
+            foreach (byte b in CRC)
+                Trace.Write($"{b}");
+            Trace.WriteLine("");
         }
     }
 }

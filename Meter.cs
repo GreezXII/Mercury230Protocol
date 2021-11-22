@@ -26,38 +26,58 @@ namespace Mercury230Protocol
             Address = addr;
             AccessLevel = al;
             Password = pwd;
-            Port.Open();
+            //Port.Open();
         }
         public async void TestConnection()
         {
-            byte[] request = { 0x00 };
-            Frame f = new Frame(Address, request);
-            byte[] buffer = f.Create();
-            Print(buffer);
-            Port.Write(buffer, 0, buffer.Length);
-            byte[] result = await ReadAsync();
-            Print(result);
+            //byte[] request = { 0x00 };
+            //Frame requestFrame = new Frame(Address, request);
+            //await WriteAsync(requestFrame);
+
+            //Frame responseFrame = await ReadAsync();
+
+            Frame f1 = new Frame(new byte[] { 89, 0x00, 0x3b, 0x0f });
+            Frame f2 = new Frame(new byte[] { 89, 0x00, 0x3b, 0x0f });
+            Frame f3 = new Frame(new byte[] { 90, 0x00, 0x3b, 0x0f });
+            Frame f4 = new Frame(new byte[] { 89, 0x01, 0x3b, 0x0f });
+
+            f1.Print();
+            f2.Print();
+            Trace.WriteLine($"f1 == f2 -> {f1 == f2}");
+            Trace.WriteLine($"f1 != f2 -> {f1 != f2}");
+
+            f3.Print();
+            Trace.WriteLine($"f1 == f3 -> {f1 == f3}");
+            Trace.WriteLine($"f1 != f3 -> {f1 != f3}");
+
+            f4.Print();
+            Trace.WriteLine($"f1 == f4 -> {f1 == f4}");
+            Trace.WriteLine($"f1 != f4 -> {f1 != f4}");
         }
 
-        private async Task<byte[]> ReadAsync()
+        private async Task WriteAsync(Frame f)
+        {
+            await Task.Run(() =>
+            {
+                byte[] buffer = f.ToArray();
+                Port.Write(buffer, 0, buffer.Length);
+            });
+        }
+        private async Task<Frame> ReadAsync()
         {
             return await Task.Run(() =>
                 {
                     Thread.Sleep(WaitAnswerTime);
                     byte[] buffer = new byte[Port.BytesToRead];
                     Port.Read(buffer, 0, buffer.Length);
-                    return buffer;
+                    Frame response = new Frame(buffer);
+                    return response;
                 });
         }
 
-        private void Print(byte[] array)
+        private bool MatchCRC(Frame a, Frame b)
         {
-            foreach (byte b in array)
-            {
-                string a = Convert.ToString(b, 16);
-                Trace.Write($"{a} ");
-            }
-            Trace.WriteLine("");
+            return a.CRC.Equals(b.CRC);
         }
     }
 }
