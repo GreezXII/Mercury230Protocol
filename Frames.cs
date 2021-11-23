@@ -25,7 +25,7 @@ namespace Mercury230Protocol
         public int Length { get; private set; }
         public Frame(byte addr, byte[] body)
         {
-            // Проверка ввода
+            // TODO: Проверка ввода
             Address = addr;
             Body = body;
             CRC = CalculateCRC16Modbus();
@@ -48,7 +48,12 @@ namespace Mercury230Protocol
             CRC = crc;
         }
         public static bool operator == (Frame a, Frame b)
-        {
+        {   
+            if (a is null)
+                return b is null;
+            if (b is null)
+                return false;
+
             if (a.Length != b.Length)
                 return false;
 
@@ -104,9 +109,10 @@ namespace Mercury230Protocol
         }
         public static bool CRCMatch(Frame a, Frame b)
         {
+            if (a == null || b == null)
+                return false;
             if (a.CRC.Length != b.CRC.Length)
                 return false;
-
             for (int i = 0; i < a.CRC.Length; i++)
                 if (a.CRC[i] != b.CRC[i])
                     return false;

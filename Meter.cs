@@ -26,16 +26,18 @@ namespace Mercury230Protocol
             Address = addr;
             AccessLevel = al;
             Password = pwd;
-            //Port.Open();
+            Port.Open();
         }
         public async void TestConnection()
         {
-            Frame requestFrame1 = new Frame(Address, new byte[] { 0x00 });
-            Frame requestFrame2 = new Frame(Address, new byte[] { 0x01 });
-            bool result = Frame.CRCMatch(requestFrame1, requestFrame2);
-            Trace.WriteLine(result);
-            //await WriteAsync(requestFrame);
-            //Frame responseFrame = await ReadAsync();
+            byte[] request = new byte[] { 0x01 };
+            Frame requestFrame = new Frame(Address, request);
+            await WriteAsync(requestFrame);
+            Frame responseFrame = await ReadAsync();
+            Trace.WriteLine($"CRCMatch = {Frame.CRCMatch(requestFrame, responseFrame)}");
+            requestFrame.Print();
+            if (!(responseFrame is null))
+                responseFrame.Print();
         }
 
         private async Task WriteAsync(Frame f)
@@ -50,7 +52,11 @@ namespace Mercury230Protocol
         {
             return await Task.Run(() =>
                 {
+                    // Если нет ответа в течение времени ожидания, вернуть null
                     Thread.Sleep(WaitAnswerTime);
+                    if (Port.BytesToRead == 0)  
+                        return null;
+                    // Иначе сформировать кадр
                     byte[] buffer = new byte[Port.BytesToRead];
                     Port.Read(buffer, 0, buffer.Length);
                     Frame response = new Frame(buffer);
