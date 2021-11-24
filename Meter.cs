@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO.Ports;
-using System.Threading;
+using System.Timers;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Threading;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Mercury230Protocol
 {
@@ -17,24 +17,28 @@ namespace Mercury230Protocol
         public MeterAccessLevel AccessLevel { get; set; }
         public string Password { get; private set; }
         private int WaitAnswerTime = 150; // TODO: Разные значения для разных скоростей
+        public bool IsConnected { get; private set; }
+        public bool AutoReconnect { get; set; }
+        private readonly System.Timers.Timer ConnectionTimer = new System.Timers.Timer() { Interval = 240000, AutoReset = true };
 
-        public Meter(byte addr, MeterAccessLevel al, string pwd)
+        public Meter(byte addr, MeterAccessLevel al, string pwd, bool AutoReconnect = false)
         {
             // TODO: Проверка ввода
             Address = addr;
             AccessLevel = al;
             Password = pwd;
             Port.Open();  // TODO: Исправить Access to the path 'COM1' is denied
+            ConnectionTimer.Elapsed += new ElapsedEventHandler(ConnectionExpired);
         }
-        public void TestConnection()
+        public bool TestConnection()
         {
             byte[] request = new byte[] { 0x00 };
             Frame requestFrame = new Frame(Address, request);
             Write(requestFrame);
             Frame responseFrame = Read();
             // TODO: найти способ получать подтверждение иначе
-            //bool result = (responseFrame.Address == requestFrame.Address) && responseFrame.Body[0] == 0x00;
-            responseFrame.Print();
+            bool result = (responseFrame.Address == requestFrame.Address) && responseFrame.Body[0] == 0x00;
+            return result;
         }
         public void OpenConnection()
         {
@@ -48,7 +52,29 @@ namespace Mercury230Protocol
             Frame requestFrame = new Frame(Address, request);
             Write(requestFrame);
             Frame responseFrame = Read();
-            responseFrame.Print();
+            // TODO
+            bool result = (responseFrame.Address == requestFrame.Address) && responseFrame.Body[0] == 0x00;
+            if (result)
+            {
+                IsConnected = true;
+                ConnectionTimer.Start();
+            }
+            Trace.WriteLine("OpenConnection");
+        }
+        public void CloseConnection()
+        {
+            byte[] request = { (byte)RequestTypes.CloseConnection };
+            Frame requestFrame = new Frame(Address, request);
+            Write(requestFrame);
+            Frame responseFrame = Read();
+            // TODO
+            bool result = (responseFrame.Address == requestFrame.Address) && responseFrame.Body[0] == 0x00;
+            if (result)
+            {
+                IsConnected = false;
+                ConnectionTimer.Stop();
+            }
+            Trace.WriteLine("CloseConnection");
         }
         private void Write(Frame f)
         {
@@ -65,10 +91,6 @@ namespace Mercury230Protocol
             Frame response = new Frame(buffer);
             return response;
         }
-        private bool MatchCRC(Frame a, Frame b)
-        {
-            return a.CRC.Equals(b.CRC);
-        }
         private byte[] StringToBytes(string s)
         {
             byte[] bytePassword = new byte[s.Length];
@@ -78,6 +100,11 @@ namespace Mercury230Protocol
                 bytePassword[i] = b;
             }
             return bytePassword;
+        }
+        private void ConnectionExpired(object o, ElapsedEventArgs e)
+        {
+            if (AutoReconnect == true)
+                OpenConnection();
         }
     }
 }

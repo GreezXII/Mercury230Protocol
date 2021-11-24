@@ -3,6 +3,7 @@ using System.IO.Ports;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,9 +31,11 @@ namespace Mercury230Protocol
         {
             try
             {
-                Meter Mercury = new Meter(89, MeterAccessLevel.Admin, "222222");
+                Meter Mercury = new Meter(89, MeterAccessLevel.User, "111111");
                 Mercury.TestConnection();
                 Mercury.OpenConnection();
+                Thread.Sleep(5000);
+                Mercury.CloseConnection();
             }
             catch (Exception exc)
             {
