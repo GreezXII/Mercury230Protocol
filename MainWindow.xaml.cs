@@ -30,7 +30,7 @@ namespace Mercury230Protocol
         {
             Meter Mercury = new Meter(89, MeterAccessLevel.User, "111111");
             Mercury.TestConnection();
-           
+            Mercury.OpenConnection();
         }
     }
 }
