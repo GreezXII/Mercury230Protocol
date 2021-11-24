@@ -41,8 +41,8 @@ namespace Mercury230Protocol
             // TODO: Способ формирования запроса со сложными параметрами (отдельный класс от Frame?)
             List<byte> requestConstructor = new List<byte>();
             requestConstructor.Add((byte)RequestTypes.OpenConnection);
-            requestConstructor.Add((byte)MeterAccessLevel.User);
-            requestConstructor.AddRange(StringToBytes("111111"));
+            requestConstructor.Add((byte)AccessLevel);
+            requestConstructor.AddRange(StringToBytes(Password));
 
             byte[] request = requestConstructor.ToArray();
             Frame requestFrame = new Frame(Address, request);
@@ -59,7 +59,7 @@ namespace Mercury230Protocol
         {
             Thread.Sleep(WaitAnswerTime);
             if (Port.BytesToRead == 0)
-                throw new Exception("Входной буфер пуст.");
+                throw new Exception("Нет ответа.");
             byte[] buffer = new byte[Port.BytesToRead];
             Port.Read(buffer, 0, buffer.Length);
             Frame response = new Frame(buffer);

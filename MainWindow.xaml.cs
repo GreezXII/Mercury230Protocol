@@ -28,9 +28,17 @@ namespace Mercury230Protocol
 
         private void ApplyBTN_Click(object sender, RoutedEventArgs e)
         {
-            Meter Mercury = new Meter(89, MeterAccessLevel.User, "111111");
-            Mercury.TestConnection();
-            Mercury.OpenConnection();
+            try
+            {
+                Meter Mercury = new Meter(89, MeterAccessLevel.Admin, "222222");
+                Mercury.TestConnection();
+                Mercury.OpenConnection();
+            }
+            catch (Exception exc)
+            {
+                string message = $"Во время выполнения возникла следующая ошибка:\n{exc.Message}";
+                MessageBox.Show(message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
