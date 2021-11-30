@@ -10,11 +10,13 @@ namespace Mercury230Protocol
         public byte Address { get; internal set; }
         public byte[] CRC { get; internal set; }
         public int Length { get; internal set; }
+        public List<string> Pattern = new List<string> { "Address" };
         public Frame() { }  // TODO: Проверка полей 
         public Frame(byte addr)
         {
             // TODO: Проверка ввода
             Address = addr;
+            CRC = CalculateCRC16Modbus();
             Length = CRC.Length + 1;
         }
         public static bool operator == (Frame a, Frame b)
@@ -62,7 +64,7 @@ namespace Mercury230Protocol
 
             return true;
         }
-        internal byte[] CalculateCRC16Modbus()
+        internal byte[] CalculateCRC16Modbus() // TODO: Перенести в Реквест?
         {
             byte[] buffer = CreateBody();
             ushort crc = 0xFFFF;
@@ -89,6 +91,7 @@ namespace Mercury230Protocol
         {
             List<byte> frame = new List<byte>();
             frame.AddRange(CreateBody());
+            CRC = CalculateCRC16Modbus();
             frame.AddRange(CRC);
             return frame.ToArray();
         }
@@ -96,21 +99,26 @@ namespace Mercury230Protocol
         {
             List<byte> body = new List<byte>();
             PropertyInfo[] props = this.GetType().GetProperties();
-            foreach (PropertyInfo pi in props)
+            foreach (string s in Pattern)
             {
-                string propertyName = pi.Name;
-                if (propertyName != "CRC" && propertyName != "Length")
+                foreach (PropertyInfo pi in props)
                 {
-                    string propertyTypeName = pi.PropertyType.Name;
-                    if (propertyTypeName == "Byte")
+                    string propertyName = pi.Name;
+                    if (propertyName != "CRC" && propertyName != "Length")
                     {
-                        byte value = (byte)pi.GetValue(this);
-                        body.Add(value);
-                    }
-                    else if (propertyTypeName == "Byte[]")
-                    {
-                        byte[] value = (byte[])pi.GetValue(this);
-                        body.AddRange(value);
+                        if (propertyName == s)
+                        {
+                            if (pi.PropertyType.Name == "Byte")
+                            {
+                                byte value = (byte)pi.GetValue(this);
+                                body.Add(value);
+                            }
+                            else if (pi.PropertyType.Name == "Byte[]")
+                            {
+                                byte[] value = (byte[])pi.GetValue(this);
+                                body.AddRange(value);
+                            }
+                        }
                     }
                 }
             }
@@ -135,10 +143,11 @@ namespace Mercury230Protocol
 
     class TestConnectionRequest : Frame
     {
-        byte Request = 0x00;
+        public byte Request { get; set; } = 0x00;
         public TestConnectionRequest(byte addr)
             : base(addr)
         {
+            Pattern.Add("Request");
             Length += 1;
         }
     }

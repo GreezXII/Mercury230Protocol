@@ -33,15 +33,11 @@ namespace Mercury230Protocol
         public bool TestConnection()
         {
             TestConnectionRequest request = new TestConnectionRequest(Address);
+            request.Print();
             Write(request);
-            //byte[] request = new byte[] { 0x00 };
-            //Frame requestFrame = new Frame(Address, request);
-            //Write(requestFrame);
-            //Frame responseFrame = Read();
-            //// TODO: найти способ получать подтверждение иначе
-            //bool result = (responseFrame.Address == requestFrame.Address) && responseFrame.Body[0] == 0x00;
-            //return result;
-            return true;
+            Response response = (Response)Read();
+            response.Print();
+            return true; // TODO: Проверка успешности ответа
         }
         //public void OpenConnection()
         //{
@@ -91,7 +87,7 @@ namespace Mercury230Protocol
                 throw new Exception("Нет ответа.");
             byte[] buffer = new byte[Port.BytesToRead];
             Port.Read(buffer, 0, buffer.Length);
-            Frame response = new Frame(buffer);
+            Response response = new Response(buffer);
             return response;
         }
         private byte[] StringToBytes(string s)
@@ -106,13 +102,8 @@ namespace Mercury230Protocol
         }
         private void ConnectionExpired(object o, ElapsedEventArgs e)
         {
-            if (AutoReconnect == true)
-                OpenConnection();
-        }
-        public void Test()
-        {
-            Frame f = new Frame(89);
-            f.Print();
+            //if (AutoReconnect == true)
+                //OpenConnection(); //TODO 
         }
     }
 }
