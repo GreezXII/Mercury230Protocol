@@ -10,6 +10,7 @@ namespace Mercury230Protocol
         public byte Address { get; internal set; }
         public byte[] CRC { get; internal set; }
         public int Length { get; internal set; }
+        public Frame() { }  // TODO: Проверка полей 
         public Frame(byte addr)
         {
             // TODO: Проверка ввода
@@ -120,6 +121,25 @@ namespace Mercury230Protocol
             byte[] request = ToArray();
             foreach (byte b in request)
                 Trace.WriteLine(b);
+        }
+    }
+
+    class Response : Frame
+    {
+        public Response(byte[] body)
+        {
+            Address = body[0];
+            CRC = new byte[] { body[^2], body[^1] };
+        }
+    }
+
+    class TestConnectionRequest : Frame
+    {
+        byte Request = 0x00;
+        public TestConnectionRequest(byte addr)
+            : base(addr)
+        {
+            Length += 1;
         }
     }
 

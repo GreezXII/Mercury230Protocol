@@ -32,50 +32,53 @@ namespace Mercury230Protocol
         }
         public bool TestConnection()
         {
-            byte[] request = new byte[] { 0x00 };
-            Frame requestFrame = new Frame(Address, request);
-            Write(requestFrame);
-            Frame responseFrame = Read();
-            // TODO: найти способ получать подтверждение иначе
-            bool result = (responseFrame.Address == requestFrame.Address) && responseFrame.Body[0] == 0x00;
-            return result;
+            TestConnectionRequest request = new TestConnectionRequest(Address);
+            Write(request);
+            //byte[] request = new byte[] { 0x00 };
+            //Frame requestFrame = new Frame(Address, request);
+            //Write(requestFrame);
+            //Frame responseFrame = Read();
+            //// TODO: найти способ получать подтверждение иначе
+            //bool result = (responseFrame.Address == requestFrame.Address) && responseFrame.Body[0] == 0x00;
+            //return result;
+            return true;
         }
-        public void OpenConnection()
-        {
-            // TODO: Способ формирования запроса со сложными параметрами (отдельный класс от Frame?)
-            List<byte> requestConstructor = new List<byte>();
-            requestConstructor.Add((byte)RequestTypes.OpenConnection);
-            requestConstructor.Add((byte)AccessLevel);
-            requestConstructor.AddRange(StringToBytes(Password));
+        //public void OpenConnection()
+        //{
+        //    // TODO: Способ формирования запроса со сложными параметрами (отдельный класс от Frame?)
+        //    List<byte> requestConstructor = new List<byte>();
+        //    requestConstructor.Add((byte)RequestTypes.OpenConnection);
+        //    requestConstructor.Add((byte)AccessLevel);
+        //    requestConstructor.AddRange(StringToBytes(Password));
 
-            byte[] request = requestConstructor.ToArray();
-            Frame requestFrame = new Frame(Address, request);
-            Write(requestFrame);
-            Frame responseFrame = Read();
-            // TODO
-            bool result = (responseFrame.Address == requestFrame.Address) && responseFrame.Body[0] == 0x00;
-            if (result)
-            {
-                IsConnected = true;
-                ConnectionTimer.Start();
-            }
-            Trace.WriteLine("OpenConnection");
-        }
-        public void CloseConnection()
-        {
-            byte[] request = { (byte)RequestTypes.CloseConnection };
-            Frame requestFrame = new Frame(Address, request);
-            Write(requestFrame);
-            Frame responseFrame = Read();
-            // TODO
-            bool result = (responseFrame.Address == requestFrame.Address) && responseFrame.Body[0] == 0x00;
-            if (result)
-            {
-                IsConnected = false;
-                ConnectionTimer.Stop();
-            }
-            Trace.WriteLine("CloseConnection");
-        }
+        //    byte[] request = requestConstructor.ToArray();
+        //    Frame requestFrame = new Frame(Address, request);
+        //    Write(requestFrame);
+        //    Frame responseFrame = Read();
+        //    // TODO
+        //    bool result = (responseFrame.Address == requestFrame.Address) && responseFrame.Body[0] == 0x00;
+        //    if (result)
+        //    {
+        //        IsConnected = true;
+        //        ConnectionTimer.Start();
+        //    }
+        //    Trace.WriteLine("OpenConnection");
+        //}
+        //public void CloseConnection()
+        //{
+        //    byte[] request = { (byte)RequestTypes.CloseConnection };
+        //    Frame requestFrame = new Frame(Address, request);
+        //    Write(requestFrame);
+        //    Frame responseFrame = Read();
+        //    // TODO
+        //    bool result = (responseFrame.Address == requestFrame.Address) && responseFrame.Body[0] == 0x00;
+        //    if (result)
+        //    {
+        //        IsConnected = false;
+        //        ConnectionTimer.Stop();
+        //    }
+        //    Trace.WriteLine("CloseConnection");
+        //}
         private void Write(Frame f)
         {
             byte[] buffer = f.ToArray();
