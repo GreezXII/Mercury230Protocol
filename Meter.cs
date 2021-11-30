@@ -106,5 +106,10 @@ namespace Mercury230Protocol
             if (AutoReconnect == true)
                 OpenConnection();
         }
+        public void Test()
+        {
+            Frame f = new Frame(89);
+            f.Print();
+        }
     }
 }

@@ -32,10 +32,11 @@ namespace Mercury230Protocol
             try
             {
                 Meter Mercury = new Meter(89, MeterAccessLevel.User, "111111");
-                Mercury.TestConnection();
-                Mercury.OpenConnection();
-                Thread.Sleep(5000);
-                Mercury.CloseConnection();
+                //Mercury.TestConnection();
+                //Mercury.OpenConnection();
+                //Thread.Sleep(5000);
+                //Mercury.CloseConnection();
+                Mercury.Test();
             }
             catch (Exception exc)
             {
