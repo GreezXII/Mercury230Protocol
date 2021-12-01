@@ -11,46 +11,12 @@ namespace Mercury230Protocol
         public byte[] CRC { get; internal set; }
         public int Length { get; internal set; }
         public List<string> Pattern = new List<string> { "Address" };
-        public Frame() { }  // TODO: Проверка полей 
+        public Frame() { }
         public Frame(byte addr)
         {
             // TODO: Проверка ввода
             Address = addr;
-            CRC = CalculateCRC16Modbus();
-            Length = CRC.Length + 1;
-        }
-        public static bool operator == (Frame a, Frame b)
-        {   
-            if (a is null)
-                return b is null;
-            if (b is null)
-                return false;
-
-            if (a.Length != b.Length)
-                return false;
-
-            byte[] b1 = a.ToArray();
-            byte[] b2 = b.ToArray();
-
-            for (int i = 0; i < a.Length; i++)
-                if (b1[i] != b2[i])
-                    return false;
-            
-            return true;
-        }
-        public static bool operator !=(Frame a, Frame b)
-        {
-            if (a.Length != b.Length)
-                return true;
-
-            byte[] b1 = a.ToArray();
-            byte[] b2 = b.ToArray();
-
-            for (int i = 0; i < a.Length; i++)
-                if (b1[i] != b2[i])
-                    return true;
-
-            return false;
+            Length = 3;
         }
         public static bool CRCMatch(Frame a, Frame b)
         {
@@ -64,19 +30,41 @@ namespace Mercury230Protocol
 
             return true;
         }
-        public byte[] ToArray()
+        public void Print()
+        {
+            PropertyInfo[] properties = this.GetType().GetProperties();
+            foreach (PropertyInfo p in properties)
+            {
+                Trace.WriteLine($"{p.Name,-8} [{p.PropertyType.Name,-8}] {p.GetValue(this)}");
+            }
+        }
+    }
+
+    class Response : Frame
+    {
+        public Response(byte[] body)
+        {
+            Address = body[0];
+            CRC = new byte[] { body[^2], body[^1] };
+        }
+    }
+
+    class Request : Frame
+    {
+        public byte RequestCode { get; internal set; }
+        public Request(byte addr)
+            : base(addr)
+        {
+            Length += 1;
+            Pattern.Add("Request");
+        }
+        public byte[] Create()
         {
             List<byte> frame = new List<byte>();
             frame.AddRange(CreateBody());
             CRC = CalculateCRC16Modbus();
             frame.AddRange(CRC);
             return frame.ToArray();
-        }
-        public void Print()
-        {
-            byte[] request = ToArray();
-            foreach (byte b in request)
-                Trace.WriteLine(b);
         }
         private byte[] CreateBody()
         {
@@ -107,7 +95,7 @@ namespace Mercury230Protocol
             }
             return body.ToArray();
         }
-        internal byte[] CalculateCRC16Modbus() // TODO: Перенести в Реквест?
+        internal byte[] CalculateCRC16Modbus()
         {
             byte[] buffer = CreateBody();
             ushort crc = 0xFFFF;
@@ -142,34 +130,23 @@ namespace Mercury230Protocol
         } // BCD - Binary-coded decimal
     }
 
-    class Response : Frame
+    class TestLinkRequest : Request
     {
-        public Response(byte[] body)
-        {
-            Address = body[0];
-            CRC = new byte[] { body[^2], body[^1] };
-        }
-    }
-
-    class TestLinkRequest : Frame
-    {
-        public byte Request { get; private set; } = (byte)RequestTypes.TestConnection;
         public TestLinkRequest(byte addr)
             : base(addr)
         {
-            Pattern.Add("Request");
-            Length += 1;
+            RequestCode = (byte)RequestTypes.TestConnection;
         }
     }
 
-    class OpenConnectionRequest : Frame
+    class OpenConnectionRequest : Request
     {
-        public byte Request { get; private set; } = (byte)RequestTypes.OpenConnection;
         public byte AccessLevel { get; private set; }
         public byte[] Password { get; private set; }
         public OpenConnectionRequest(byte addr, MeterAccessLevel accLvl, string pwd)
             : base(addr)
         {
+            RequestCode = (byte)RequestTypes.OpenConnection;
             AccessLevel = (byte)accLvl;
             Password = StringToBCD(pwd);
             Pattern.AddRange( new string[] { "AccessLevel", "Password" });
@@ -177,14 +154,12 @@ namespace Mercury230Protocol
         }
     }
 
-    class CloseConnectionRequest : Frame
+    class CloseConnectionRequest : Request
     {
-        public byte Request { get; private set; } = (byte)RequestTypes.CloseConnection;
         public CloseConnectionRequest(byte addr)
             : base(addr)
         {
-            Pattern.Add("Request");
-            Length += 1;
+            RequestCode = (byte)RequestTypes.CloseConnection;
         }
     }
 

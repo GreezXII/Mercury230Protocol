@@ -59,7 +59,7 @@ namespace Mercury230Protocol
         }
         private void Write(Frame f)
         {
-            byte[] buffer = f.ToArray();
+            byte[] buffer = f.Create();
             Port.Write(buffer, 0, buffer.Length);
         }
         private Response Read()
