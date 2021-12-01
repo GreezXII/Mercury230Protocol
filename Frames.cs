@@ -35,7 +35,7 @@ namespace Mercury230Protocol
             PropertyInfo[] properties = this.GetType().GetProperties();
             foreach (PropertyInfo p in properties)
             {
-                Trace.WriteLine($"{p.Name,-8} [{p.PropertyType.Name,-8}] {p.GetValue(this)}");
+                Trace.WriteLine($"{p.Name,-12} {p.PropertyType.Name,-8} {p.GetValue(this)}");
             }
         }
     }
@@ -56,13 +56,13 @@ namespace Mercury230Protocol
             : base(addr)
         {
             Length += 1;
-            Pattern.Add("Request");
+            Pattern.Add("RequestCode");
         }
         public byte[] Create()
         {
             List<byte> frame = new List<byte>();
             frame.AddRange(CreateBody());
-            CRC = CalculateCRC16Modbus();
+            CalculateCRC16Modbus();
             frame.AddRange(CRC);
             return frame.ToArray();
         }
@@ -118,16 +118,19 @@ namespace Mercury230Protocol
             CRC = BitConverter.GetBytes(crc);
             return CRC;
         }
-        internal byte[] StringToBCD(string s)
+        internal byte[] StringToBCD(string s)  // BCD - Binary-coded decimal
         {
             byte[] bytePassword = new byte[s.Length];
             for (int i = 0; i < s.Length; i++)
             {
-                byte b = byte.Parse(s[i].ToString());  // TODO: Проверка на ввод только чисел
+                byte b;
+                bool result = byte.TryParse(s[i].ToString(), out b);
+                if (!result)
+                    throw new Exception($"Не удалось преобразовать {s} в двоично-десятичное представление.");
                 bytePassword[i] = b;
             }
             return bytePassword;
-        } // BCD - Binary-coded decimal
+        }
     }
 
     class TestLinkRequest : Request

@@ -31,11 +31,11 @@ namespace Mercury230Protocol
         {
             try
             {
-                Meter Mercury = new Meter(89, MeterAccessLevel.User, "111111");
-                Mercury.TestConnection();
-                //Mercury.OpenConnection();
-                //Thread.Sleep(5000);
-                //Mercury.CloseConnection();
+                Meter Mercury = new Meter(90, MeterAccessLevel.User, "111111");
+                Mercury.TestLink();
+                Mercury.OpenConnection();
+                Thread.Sleep(5000);
+                Mercury.CloseConnection();
             }
             catch (Exception exc)
             {
