@@ -17,8 +17,8 @@ namespace Mercury230Protocol
         public MeterAccessLevel AccessLevel { get; set; }
         public string Password { get; private set; }
         private int WaitAnswerTime = 150; // TODO: Разные значения для разных скоростей
-        public bool IsConnected { get; private set; }
         public bool AutoReconnect { get; set; }
+        public bool IsConnected { get; private set; }
         private readonly System.Timers.Timer ConnectionTimer = new System.Timers.Timer() { Interval = 240000, AutoReset = true };
 
         public Meter(byte addr, MeterAccessLevel al, string pwd, bool AutoReconnect = false)
@@ -30,57 +30,39 @@ namespace Mercury230Protocol
             Port.Open();  // TODO: Исправить Access to the path 'COM1' is denied
             ConnectionTimer.Elapsed += new ElapsedEventHandler(ConnectionExpired);
         }
-        public bool TestConnection()
+        public bool TestLink()
         {
-            TestConnectionRequest request = new TestConnectionRequest(Address);
+            TestLinkRequest request = new TestLinkRequest(Address);
             request.Print();
             Write(request);
-            Response response = (Response)Read();
+            Response response = Read();
             response.Print();
             return true; // TODO: Проверка успешности ответа
         }
-        //public void OpenConnection()
-        //{
-        //    // TODO: Способ формирования запроса со сложными параметрами (отдельный класс от Frame?)
-        //    List<byte> requestConstructor = new List<byte>();
-        //    requestConstructor.Add((byte)RequestTypes.OpenConnection);
-        //    requestConstructor.Add((byte)AccessLevel);
-        //    requestConstructor.AddRange(StringToBytes(Password));
-
-        //    byte[] request = requestConstructor.ToArray();
-        //    Frame requestFrame = new Frame(Address, request);
-        //    Write(requestFrame);
-        //    Frame responseFrame = Read();
-        //    // TODO
-        //    bool result = (responseFrame.Address == requestFrame.Address) && responseFrame.Body[0] == 0x00;
-        //    if (result)
-        //    {
-        //        IsConnected = true;
-        //        ConnectionTimer.Start();
-        //    }
-        //    Trace.WriteLine("OpenConnection");
-        //}
-        //public void CloseConnection()
-        //{
-        //    byte[] request = { (byte)RequestTypes.CloseConnection };
-        //    Frame requestFrame = new Frame(Address, request);
-        //    Write(requestFrame);
-        //    Frame responseFrame = Read();
-        //    // TODO
-        //    bool result = (responseFrame.Address == requestFrame.Address) && responseFrame.Body[0] == 0x00;
-        //    if (result)
-        //    {
-        //        IsConnected = false;
-        //        ConnectionTimer.Stop();
-        //    }
-        //    Trace.WriteLine("CloseConnection");
-        //}
+        public bool OpenConnection()
+        {
+            OpenConnectionRequest request = new OpenConnectionRequest(Address, AccessLevel, Password);
+            request.Print();
+            Write(request);
+            Response response = Read();
+            response.Print();
+            IsConnected = true;
+            return true;  // TODO: Проверка успешности ответа
+        }
+        public bool CloseConnection()
+        {
+            CloseConnectionRequest request = new CloseConnectionRequest(Address);
+            Write(request);
+            Response response = Read();
+            IsConnected = false;
+            return true;  // TODO: Проверка успешности ответа
+        }
         private void Write(Frame f)
         {
             byte[] buffer = f.ToArray();
             Port.Write(buffer, 0, buffer.Length);
         }
-        private Frame Read()
+        private Response Read()
         {
             Thread.Sleep(WaitAnswerTime);
             if (Port.BytesToRead == 0)
@@ -89,16 +71,6 @@ namespace Mercury230Protocol
             Port.Read(buffer, 0, buffer.Length);
             Response response = new Response(buffer);
             return response;
-        }
-        private byte[] StringToBytes(string s)
-        {
-            byte[] bytePassword = new byte[s.Length];
-            for (int i = 0; i < s.Length; i++)
-            {
-                byte b = byte.Parse(s[i].ToString());  // TODO: Проверка на ввод только чисел
-                bytePassword[i] = b;
-            }
-            return bytePassword;
         }
         private void ConnectionExpired(object o, ElapsedEventArgs e)
         {

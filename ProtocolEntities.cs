@@ -8,7 +8,7 @@ namespace Mercury230Protocol
 {
     enum RequestTypes : byte
     {
-        TestLink = 0x00,        // Тестирование канала связи
+        TestConnection = 0x00,        // Тестирование канала связи
         OpenConnection = 0x01,  // Запрос на открытие канала связи
         CloseConnection = 0x02, // Запрос на закрытие канала связи
         ReadArray = 0x05        // Запрос на чтение массивов в пределах 12 месяцев

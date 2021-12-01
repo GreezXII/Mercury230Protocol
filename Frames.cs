@@ -64,29 +64,6 @@ namespace Mercury230Protocol
 
             return true;
         }
-        internal byte[] CalculateCRC16Modbus() // TODO: Перенести в Реквест?
-        {
-            byte[] buffer = CreateBody();
-            ushort crc = 0xFFFF;
-
-            for (int pos = 0; pos < buffer.Length; pos++)
-            {
-                crc ^= (ushort)buffer[pos];
-
-                for (int i = 8; i != 0; i--)
-                {
-                    if ((crc & 0x0001) != 0)
-                    {
-                        crc >>= 1;
-                        crc ^= 0xA001;
-                    }
-                    else
-                        crc >>= 1;
-                }
-            }
-            CRC = BitConverter.GetBytes(crc);
-            return CRC;
-        }
         public byte[] ToArray()
         {
             List<byte> frame = new List<byte>();
@@ -94,6 +71,12 @@ namespace Mercury230Protocol
             CRC = CalculateCRC16Modbus();
             frame.AddRange(CRC);
             return frame.ToArray();
+        }
+        public void Print()
+        {
+            byte[] request = ToArray();
+            foreach (byte b in request)
+                Trace.WriteLine(b);
         }
         private byte[] CreateBody()
         {
@@ -124,12 +107,39 @@ namespace Mercury230Protocol
             }
             return body.ToArray();
         }
-        public void Print()
+        internal byte[] CalculateCRC16Modbus() // TODO: Перенести в Реквест?
         {
-            byte[] request = ToArray();
-            foreach (byte b in request)
-                Trace.WriteLine(b);
+            byte[] buffer = CreateBody();
+            ushort crc = 0xFFFF;
+
+            for (int pos = 0; pos < buffer.Length; pos++)
+            {
+                crc ^= (ushort)buffer[pos];
+
+                for (int i = 8; i != 0; i--)
+                {
+                    if ((crc & 0x0001) != 0)
+                    {
+                        crc >>= 1;
+                        crc ^= 0xA001;
+                    }
+                    else
+                        crc >>= 1;
+                }
+            }
+            CRC = BitConverter.GetBytes(crc);
+            return CRC;
         }
+        internal byte[] StringToBCD(string s)
+        {
+            byte[] bytePassword = new byte[s.Length];
+            for (int i = 0; i < s.Length; i++)
+            {
+                byte b = byte.Parse(s[i].ToString());  // TODO: Проверка на ввод только чисел
+                bytePassword[i] = b;
+            }
+            return bytePassword;
+        } // BCD - Binary-coded decimal
     }
 
     class Response : Frame
@@ -141,10 +151,36 @@ namespace Mercury230Protocol
         }
     }
 
-    class TestConnectionRequest : Frame
+    class TestLinkRequest : Frame
     {
-        public byte Request { get; set; } = 0x00;
-        public TestConnectionRequest(byte addr)
+        public byte Request { get; private set; } = (byte)RequestTypes.TestConnection;
+        public TestLinkRequest(byte addr)
+            : base(addr)
+        {
+            Pattern.Add("Request");
+            Length += 1;
+        }
+    }
+
+    class OpenConnectionRequest : Frame
+    {
+        public byte Request { get; private set; } = (byte)RequestTypes.OpenConnection;
+        public byte AccessLevel { get; private set; }
+        public byte[] Password { get; private set; }
+        public OpenConnectionRequest(byte addr, MeterAccessLevel accLvl, string pwd)
+            : base(addr)
+        {
+            AccessLevel = (byte)accLvl;
+            Password = StringToBCD(pwd);
+            Pattern.AddRange( new string[] { "AccessLevel", "Password" });
+            Length += 1 + Password.Length;
+        }
+    }
+
+    class CloseConnectionRequest : Frame
+    {
+        public byte Request { get; private set; } = (byte)RequestTypes.CloseConnection;
+        public CloseConnectionRequest(byte addr)
             : base(addr)
         {
             Pattern.Add("Request");
