@@ -61,6 +61,20 @@ namespace Mercury230Protocol
             ConnectionTimer.Stop();
             return true;
         }
+        public bool ReadStoredEnergy()
+        {
+            ReadStoredEnergyRequest request = new ReadStoredEnergyRequest(Address,
+                                                                          DataArrays.FromReset,
+                                                                          Months.None,
+                                                                          Rates.Sum);
+            request.Print();
+            Write(request);
+            Response response = Read();
+            if (response == null)
+                return false;
+            response.Print();
+            return true;
+        }
         private void Write(Request f)
         {
             byte[] buffer = f.Create();

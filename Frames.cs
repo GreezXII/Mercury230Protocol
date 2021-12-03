@@ -14,7 +14,6 @@ namespace Mercury230Protocol
         public Frame() { }
         public Frame(byte addr)
         {
-            // TODO: Проверка ввода
             Address = addr;
             Length = 3;
         }
@@ -166,20 +165,23 @@ namespace Mercury230Protocol
         }
     }
 
-    //class ReadArrayRequest : Frame
-    //{
-    //    public DataArrays DataArray { get; set; }
-    //    public Months Month { get; set; }
-    //    public Rates Rate { get; set; }
-    //    public ReadArrayRequest(byte addr, DataArrays dataArray, Months month, Rates rate)
-    //    {
-    //        Address = addr;
-    //        DataArray = dataArray;
-    //        Month = month;
-    //        Rate = rate;
-    //        Length = 6;
-    //        //CRC = CalculateCRC16Modbus();
-
-    //    }
-    //}
+    class ReadStoredEnergyRequest : Request
+    {
+        public byte ArrayMonth { get; set; }
+        public byte Rate { get; set; }
+        public ReadStoredEnergyRequest(byte addr, DataArrays dataArray, Months month, Rates rate)
+            :base(addr)
+        {
+            RequestCode = (byte)RequestTypes.ReadArray;
+            ArrayMonth = CombineHalfBytes((byte)dataArray, (byte)month);
+            Rate = (byte)rate;
+            Pattern.AddRange(new string[] { "ArrayMonth", "Rate" });
+            Length += 2;
+        }
+        private byte CombineHalfBytes(byte a, byte b)
+        {
+            a = (byte)(a << 4);
+            return (byte)(a | b);
+        }
+    }
 }
