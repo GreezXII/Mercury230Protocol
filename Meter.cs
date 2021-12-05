@@ -34,7 +34,7 @@ namespace Mercury230Protocol
         {
             TestLinkRequest request = new TestLinkRequest(Address);
             Write(request);
-            Response response = Read();
+            Response response = new Response(Read()); // TODO: response class?
             if (response == null)
                 return false;
             return true;
@@ -43,7 +43,7 @@ namespace Mercury230Protocol
         {
             OpenConnectionRequest request = new OpenConnectionRequest(Address, AccessLevel, Password);
             Write(request);
-            Response response = Read();
+            Response response = new Response(Read()); // TODO: response class?
             IsConnected = true;
             if (response == null)
                 return false;
@@ -54,22 +54,18 @@ namespace Mercury230Protocol
         {
             CloseConnectionRequest request = new CloseConnectionRequest(Address);
             Write(request);
-            Response response = Read();
+            Response response = new Response(Read()); // TODO: response class?
             IsConnected = false;
             if (response == null)
                 return false;
             ConnectionTimer.Stop();
             return true;
         }
-        public bool ReadStoredEnergy()
+        public bool ReadStoredEnergy(DataArrays da, Months m, Rates r)
         {
-            ReadStoredEnergyRequest request = new ReadStoredEnergyRequest(Address,
-                                                                          DataArrays.FromReset,
-                                                                          Months.None,
-                                                                          Rates.Sum);
-            request.Print();
+            ReadStoredEnergyRequest request = new ReadStoredEnergyRequest(Address, da, m, r);
             Write(request);
-            Response response = Read();
+            ReadStoredEnergyResponse response = new ReadStoredEnergyResponse(Read()); 
             if (response == null)
                 return false;
             response.Print();
@@ -80,15 +76,14 @@ namespace Mercury230Protocol
             byte[] buffer = f.Create();
             Port.Write(buffer, 0, buffer.Length);
         }
-        private Response Read()
+        private byte[] Read()
         {
             Thread.Sleep(WaitAnswerTime);
             if (Port.BytesToRead == 0)
                 return null;
             byte[] buffer = new byte[Port.BytesToRead];
             Port.Read(buffer, 0, buffer.Length);
-            Response response = new Response(buffer);
-            return response;
+            return buffer;
         }
         private void ConnectionExpired(object o, ElapsedEventArgs e)
         {

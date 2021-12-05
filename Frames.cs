@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Buffers;
 
 namespace Mercury230Protocol
 {
@@ -41,11 +42,68 @@ namespace Mercury230Protocol
 
     class Response : Frame
     {
-        public Response(byte[] body)
+        public Response(byte[] response)
         {
-            Address = body[0];
-            CRC = new byte[] { body[^2], body[^1] };
+            Address = response[0];
+            CRC = new byte[] { response[^2], response[^1] };
         }
+        
+    }
+
+    class ReadStoredEnergyResponse : Response
+    {
+        public double ActivePositive { get; private set; }
+        public double ActiveNegative { get; private set; }
+        public double ReactivePositive { get; private set; }
+        public double ReactiveNegative { get; private set; }
+        public double Phase1 { get; private set; }
+        public double Phase2 { get; private set; }
+        public double Phase3 { get; private set; }
+        public ReadStoredEnergyResponse(byte[] response)
+            : base(response)
+        {
+            if (response.Length == 19)
+                Pattern.AddRange(new string[] { "ActivePositive", "ActiveNegative", "ReactivePositive", "ReactiveNegative" });
+            if (response.Length == 15)
+                Pattern.AddRange(new string[] { "Phase1", "Phase2", "Phase3" });
+            ParseBody(response);
+        }
+        internal void ParseBody(byte[] response) // TODO: Оптимизировать создание тела и парсинг отета
+        {
+            byte[] buffer = new byte[4];
+            int index = 1;
+            int step = 4;
+            PropertyInfo[] props = this.GetType().GetProperties();
+            foreach (string s in Pattern)
+            {
+                foreach (PropertyInfo pi in props)
+                {
+                    if (pi.Name != "Address" && pi.Name != "CRC" && pi.Name != "Length")
+                    {
+                        if (pi.Name == s)
+                        {
+                            Buffer.BlockCopy(response, index, buffer, 0, buffer.Length);
+                            pi.SetValue(this, GetEnergyValue(buffer));
+                            index += step;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        private double GetEnergyValue(byte[] array)
+        {
+            string[] buffer = new string[array.Length];
+            buffer[0] = Convert.ToString(array[1], 16);
+            buffer[1] = Convert.ToString(array[0], 16);
+            buffer[2] = Convert.ToString(array[3], 16);
+            buffer[3] = Convert.ToString(array[2], 16);
+
+            string hex = String.Join("", buffer);
+            int energy = Convert.ToInt32(hex, 16);
+            return energy / 1000.0d;
+        }
+
     }
 
     class Request : Frame
@@ -73,10 +131,9 @@ namespace Mercury230Protocol
             {
                 foreach (PropertyInfo pi in props)
                 {
-                    string propertyName = pi.Name;
-                    if (propertyName != "CRC" && propertyName != "Length")
+                    if (pi.Name != "CRC" && pi.Name != "Length")
                     {
-                        if (propertyName == s)
+                        if (pi.Name == s)
                         {
                             if (pi.PropertyType.Name == "Byte")
                             {
@@ -88,6 +145,7 @@ namespace Mercury230Protocol
                                 byte[] value = (byte[])pi.GetValue(this);
                                 body.AddRange(value);
                             }
+                            break;
                         }
                     }
                 }
@@ -167,8 +225,8 @@ namespace Mercury230Protocol
 
     class ReadStoredEnergyRequest : Request
     {
-        public byte ArrayMonth { get; set; }
-        public byte Rate { get; set; }
+        public byte ArrayMonth { get; private set; }
+        public byte Rate { get; private set; }
         public ReadStoredEnergyRequest(byte addr, DataArrays dataArray, Months month, Rates rate)
             :base(addr)
         {
