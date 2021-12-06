@@ -68,28 +68,22 @@ namespace Mercury230Protocol
                 Pattern.AddRange(new string[] { "Phase1", "Phase2", "Phase3" });
             ParseBody(response);
         }
-        internal void ParseBody(byte[] response) // TODO: Оптимизировать создание тела и парсинг отета
+        internal void ParseBody(byte[] response)
         {
             byte[] buffer = new byte[4];
             int index = 1;
             int step = 4;
             PropertyInfo[] props = this.GetType().GetProperties();
-            foreach (string s in Pattern)
-            {
+            for (int i = 1; i < Pattern.Count; i++)
                 foreach (PropertyInfo pi in props)
-                {
-                    if (pi.Name != "Address" && pi.Name != "CRC" && pi.Name != "Length")
-                    {
-                        if (pi.Name == s)
+                    if (pi.Name != "Address" && pi.Name == Pattern[i])
+                        if (pi.Name == Pattern[i])
                         {
                             Buffer.BlockCopy(response, index, buffer, 0, buffer.Length);
                             pi.SetValue(this, GetEnergyValue(buffer));
                             index += step;
                             break;
                         }
-                    }
-                }
-            }
         }
         private double GetEnergyValue(byte[] array)
         {
@@ -132,28 +126,21 @@ namespace Mercury230Protocol
             List<byte> body = new List<byte>();
             PropertyInfo[] props = this.GetType().GetProperties();
             foreach (string s in Pattern)
-            {
                 foreach (PropertyInfo pi in props)
-                {
-                    if (pi.Name != "CRC" && pi.Name != "Length")
+                    if (pi.Name == s)
                     {
-                        if (pi.Name == s)
+                        if (pi.PropertyType.Name == "Byte")
                         {
-                            if (pi.PropertyType.Name == "Byte")
-                            {
-                                byte value = (byte)pi.GetValue(this);
-                                body.Add(value);
-                            }
-                            else if (pi.PropertyType.Name == "Byte[]")
-                            {
-                                byte[] value = (byte[])pi.GetValue(this);
-                                body.AddRange(value);
-                            }
-                            break;
+                            byte value = (byte)pi.GetValue(this);
+                            body.Add(value);
                         }
+                        else if (pi.PropertyType.Name == "Byte[]")
+                        {
+                            byte[] value = (byte[])pi.GetValue(this);
+                            body.AddRange(value);
+                        }
+                        break;
                     }
-                }
-            }
             return body.ToArray();
         }
         internal byte[] CalculateCRC16Modbus()
