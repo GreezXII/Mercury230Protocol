@@ -99,6 +99,10 @@ namespace Mercury230Protocol
             buffer[2] = Convert.ToString(array[3], 16);
             buffer[3] = Convert.ToString(array[2], 16);
 
+            for (int i = 0; i < buffer.Length; i++)
+                if (buffer[i].Length == 1)
+                    buffer[i] = "0" + buffer[i];
+
             string hex = String.Join("", buffer);
             int energy = Convert.ToInt32(hex, 16);
             return energy / 1000.0d;
