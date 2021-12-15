@@ -47,7 +47,6 @@ namespace Mercury230Protocol
             Address = response[0];
             CRC = new byte[] { response[^2], response[^1] };
         }
-        
     }
 
     class ReadStoredEnergyResponse : Response
@@ -68,7 +67,7 @@ namespace Mercury230Protocol
                 Pattern.AddRange(new string[] { "Phase1", "Phase2", "Phase3" });
             ParseBody(response);
         }
-        internal void ParseBody(byte[] response)
+        private void ParseBody(byte[] response) // TODO: упростить без использования паттернов
         {
             byte[] buffer = new byte[4];
             int index = 1;
@@ -77,13 +76,12 @@ namespace Mercury230Protocol
             for (int i = 1; i < Pattern.Count; i++)
                 foreach (PropertyInfo pi in props)
                     if (pi.Name != "Address" && pi.Name == Pattern[i])
-                        if (pi.Name == Pattern[i])
-                        {
-                            Buffer.BlockCopy(response, index, buffer, 0, buffer.Length);
-                            pi.SetValue(this, GetEnergyValue(buffer));
-                            index += step;
-                            break;
-                        }
+                    {
+                        Buffer.BlockCopy(response, index, buffer, 0, buffer.Length);
+                        pi.SetValue(this, GetEnergyValue(buffer));
+                        index += step;
+                        break;
+                    }
         }
         private double GetEnergyValue(byte[] array)
         {
@@ -96,12 +94,35 @@ namespace Mercury230Protocol
             for (int i = 0; i < buffer.Length; i++)
                 if (buffer[i].Length == 1)
                     buffer[i] = "0" + buffer[i];
-
             string hex = String.Join("", buffer);
             int energy = Convert.ToInt32(hex, 16);
             return energy / 1000.0d;
         }
+    }
 
+    class SerialNumberAndReleaseDateResponse : Response
+    {
+        public string SerialNumber { get; private set; }
+        public DateTime ReleaseDate { get; private set; }
+        public SerialNumberAndReleaseDateResponse(byte[] response)
+            : base(response)
+        {
+            byte[] serialNumberBuffer = new byte[4];
+            Array.Copy(response, 1, serialNumberBuffer, 0, 4);
+            string hex = "";
+            foreach (byte b in serialNumberBuffer) // TODO: Объедиить с GetEnergyValue
+            {
+                string s = Convert.ToString(b);
+                if (b / 10 == 0)
+                    s = "0" + s;
+                hex += s;
+            }
+            SerialNumber = hex;
+
+            byte[] releaseDateBuffer = new byte[3];
+            Array.Copy(response, 5, releaseDateBuffer, 0, 3);
+            ReleaseDate = new DateTime(releaseDateBuffer[2], releaseDateBuffer[1], releaseDateBuffer[0]);
+        }
     }
 
     class Request : Frame
@@ -231,6 +252,21 @@ namespace Mercury230Protocol
         {
             a = (byte)(a << 4);
             return (byte)(a | b);
+        }
+    }
+
+    class ReadSettingsRequest : Request
+    {
+        public byte SettingNumber { get; private set; }
+        public byte[] Parameters { get; private set; }
+        public ReadSettingsRequest(byte addr, SettingNumber sn, byte[] param)
+            :base(addr)
+        {
+            RequestCode = (byte)RequestTypes.ReadSettings;
+            SettingNumber = (byte)sn;
+            Parameters = param;
+            Pattern.AddRange(new string[] { "SettingNumber", "Parameters" });
+            Length += 2;
         }
     }
 }

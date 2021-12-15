@@ -8,10 +8,16 @@ namespace Mercury230Protocol
 {
     enum RequestTypes : byte
     {
-        TestConnection = 0x00,        // Тестирование канала связи
+        TestConnection = 0x00,  // Тестирование канала связи
         OpenConnection = 0x01,  // Запрос на открытие канала связи
         CloseConnection = 0x02, // Запрос на закрытие канала связи
+        ReadSettings = 0x08,    // Запрос на чтение параметров
         ReadArray = 0x05        // Запрос на чтение массивов в пределах 12 месяцев
+    }
+
+    enum SettingNumber : byte
+    {
+            SerialNumberAndReleaseDate = 0x00,  // Серийный номер и дата выпуска
     }
 
     enum MeterAccessLevel : byte

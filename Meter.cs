@@ -71,6 +71,17 @@ namespace Mercury230Protocol
             response.Print();
             return true;
         }
+        public bool ReadSerialNumberAndReleaseDate()
+        {
+            ReadSettingsRequest request = new ReadSettingsRequest(Address, SettingNumber.SerialNumberAndReleaseDate, Array.Empty<byte>());
+            Write(request);
+            request.Print();
+            SerialNumberAndReleaseDateResponse response = new SerialNumberAndReleaseDateResponse(Read());
+            if (response == null)
+                return false;
+            response.Print();
+            return true;
+        }
         private void Write(Request f)
         {
             byte[] buffer = f.Create();

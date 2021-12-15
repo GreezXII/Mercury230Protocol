@@ -34,7 +34,8 @@ namespace Mercury230Protocol
                 Meter Mercury230 = new Meter(89, MeterAccessLevel.User, "111111");
                 Mercury230.TestLink();
                 Mercury230.OpenConnection();
-                Mercury230.ReadStoredEnergy(DataArrays.PerPhase, Months.None, Rates.Sum);
+                Mercury230.ReadStoredEnergy(DataArrays.FromReset, Months.None, Rates.Sum);
+                Mercury230.ReadSerialNumberAndReleaseDate();
                 Mercury230.CloseConnection();
             }
             catch (Exception exc)
