@@ -73,10 +73,20 @@ namespace Mercury230Protocol
         }
         public bool ReadSerialNumberAndReleaseDate()
         {
-            ReadSettingsRequest request = new ReadSettingsRequest(Address, SettingNumber.SerialNumberAndReleaseDate, Array.Empty<byte>());
+            ReadSettingsRequest request = new ReadSettingsRequest(Address, Setting.SerialNumberAndReleaseDate, Array.Empty<byte>());
             Write(request);
             request.Print();
             SerialNumberAndReleaseDateResponse response = new SerialNumberAndReleaseDateResponse(Read());
+            if (response == null)
+                return false;
+            response.Print();
+            return true;
+        }
+        public bool ReadSoftwareVersion()
+        {
+            ReadSettingsRequest request = new ReadSettingsRequest(Address, Setting.SoftwareVersion, Array.Empty<byte>());
+            Write(request);
+            SoftwareVersionResponse response = new SoftwareVersionResponse(Read());
             if (response == null)
                 return false;
             response.Print();

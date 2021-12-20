@@ -15,9 +15,10 @@ namespace Mercury230Protocol
         ReadArray = 0x05        // Запрос на чтение массивов в пределах 12 месяцев
     }
 
-    enum SettingNumber : byte
+    enum Setting : byte
     {
             SerialNumberAndReleaseDate = 0x00,  // Серийный номер и дата выпуска
+            SoftwareVersion = 0x03              // Версия ПО
     }
 
     enum MeterAccessLevel : byte

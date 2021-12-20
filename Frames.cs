@@ -35,7 +35,7 @@ namespace Mercury230Protocol
             PropertyInfo[] properties = this.GetType().GetProperties();
             foreach (PropertyInfo p in properties)
             {
-                Trace.WriteLine($"{p.Name,-12} {p.PropertyType.Name,-8} {p.GetValue(this)}");
+                Trace.WriteLine($"{p.Name,-20} {p.PropertyType.Name,-8} {p.GetValue(this)}");
             }
         }
     }
@@ -47,17 +47,28 @@ namespace Mercury230Protocol
             Address = response[0];
             CRC = new byte[] { response[^2], response[^1] };
         }
-        internal string BytesToDecimalString(byte[] buffer)
+        internal int FullHexToInt(byte[] buffer)
         {
             string hex = "";
-            string hexChar;
             for (int i = 0; i < buffer.Length; i++)
+                hex += ByteToHexString(buffer[i]);
+            return Convert.ToInt32(hex, 16);
+        }
+        internal int BiwiseBytesToInt(byte[] buffer)
+        {
+            int result = buffer[0];
+            for (int i = 1; i < buffer.Length; i++)
             {
-                hexChar = Convert.ToString(buffer[i], 16);
-                if (hexChar.Length == 1)
-                    hexChar = "0" + hexChar;
-                hex += hexChar;
+                result *= 100;
+                result += buffer[i];
             }
+            return result;
+        }
+        internal string ByteToHexString(byte b)
+        {
+            string hex = Convert.ToString(b, 16);
+            if (hex.Length == 1)
+                hex = "0" + hex;
             return hex;
         }
     }
@@ -106,26 +117,41 @@ namespace Mercury230Protocol
             buffer[2] = array[3];
             buffer[3] = array[2];
 
-            string hex = BytesToDecimalString(buffer);
-            Trace.WriteLine(hex);
-            return Convert.ToInt32(hex, 16) / 1000.0d;
+            return FullHexToInt(buffer) / 1000.0d;
         }
     }
 
     class SerialNumberAndReleaseDateResponse : Response
     {
-        public string SerialNumber { get; private set; }
+        public int SerialNumber { get; private set; }
         public DateTime ReleaseDate { get; private set; }
         public SerialNumberAndReleaseDateResponse(byte[] response)
             : base(response)
         {
             byte[] serialNumberBuffer = new byte[4];
             Array.Copy(response, 1, serialNumberBuffer, 0, 4);
-            SerialNumber = BytesToDecimalString(serialNumberBuffer);
+            SerialNumber = BiwiseBytesToInt(serialNumberBuffer);
 
             byte[] releaseDateBuffer = new byte[3];
             Array.Copy(response, 5, releaseDateBuffer, 0, 3);
-            ReleaseDate = new DateTime(releaseDateBuffer[2], releaseDateBuffer[1], releaseDateBuffer[0]);
+            ReleaseDate = new DateTime(2000 + releaseDateBuffer[2], releaseDateBuffer[1], releaseDateBuffer[0]);
+        }
+    }
+
+    class SoftwareVersionResponse : Response
+    {
+        public string SoftwareVersion { get; private set; }
+        public SoftwareVersionResponse(byte[] response)
+            : base(response)
+        {
+            byte[] buffer = new byte[3];
+            Array.Copy(response, 1, buffer, 0, 3);
+
+            SoftwareVersion = buffer[0].ToString();
+            for (int i = 1; i < buffer.Length; i++)
+            {
+                SoftwareVersion += "." + buffer[i].ToString();
+            }
         }
     }
 
@@ -263,7 +289,7 @@ namespace Mercury230Protocol
     {
         public byte SettingNumber { get; private set; }
         public byte[] Parameters { get; private set; }
-        public ReadSettingsRequest(byte addr, SettingNumber sn, byte[] param)
+        public ReadSettingsRequest(byte addr, Setting sn, byte[] param)
             :base(addr)
         {
             RequestCode = (byte)RequestTypes.ReadSettings;
