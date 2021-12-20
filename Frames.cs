@@ -47,6 +47,19 @@ namespace Mercury230Protocol
             Address = response[0];
             CRC = new byte[] { response[^2], response[^1] };
         }
+        internal string BytesToDecimalString(byte[] buffer)
+        {
+            string hex = "";
+            string hexChar;
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                hexChar = Convert.ToString(buffer[i], 16);
+                if (hexChar.Length == 1)
+                    hexChar = "0" + hexChar;
+                hex += hexChar;
+            }
+            return hex;
+        }
     }
 
     class ReadStoredEnergyResponse : Response
@@ -62,41 +75,40 @@ namespace Mercury230Protocol
             : base(response)
         {
             if (response.Length == 19)
-                Pattern.AddRange(new string[] { "ActivePositive", "ActiveNegative", "ReactivePositive", "ReactiveNegative" });
+            {
+                byte[] buffer = new byte[4];
+                Array.Copy(response, 1, buffer, 0, 4);
+                ActivePositive = GetEnergyValue(buffer);
+                Array.Copy(response, 5, buffer, 0, 4);
+                ActiveNegative = GetEnergyValue(buffer);
+                Array.Copy(response, 9, buffer, 0, 4);
+                ReactivePositive = GetEnergyValue(buffer);
+                Array.Copy(response, 13, buffer, 0, 4);
+                ReactiveNegative = GetEnergyValue(buffer);
+            }
             if (response.Length == 15)
-                Pattern.AddRange(new string[] { "Phase1", "Phase2", "Phase3" });
-            ParseBody(response);
-        }
-        private void ParseBody(byte[] response) // TODO: упростить без использования паттернов
-        {
-            byte[] buffer = new byte[4];
-            int index = 1;
-            int step = 4;
-            PropertyInfo[] props = this.GetType().GetProperties();
-            for (int i = 1; i < Pattern.Count; i++)
-                foreach (PropertyInfo pi in props)
-                    if (pi.Name != "Address" && pi.Name == Pattern[i])
-                    {
-                        Buffer.BlockCopy(response, index, buffer, 0, buffer.Length);
-                        pi.SetValue(this, GetEnergyValue(buffer));
-                        index += step;
-                        break;
-                    }
+            {
+                byte[] buffer = new byte[4];
+                Array.Copy(response, 1, buffer, 0, 4);
+                Phase1 = GetEnergyValue(buffer);
+                Array.Copy(response, 1, buffer, 0, 4);
+                Phase2 = GetEnergyValue(buffer);
+                Array.Copy(response, 1, buffer, 0, 4);
+                Phase3 = GetEnergyValue(buffer);
+            }
         }
         private double GetEnergyValue(byte[] array)
         {
-            string[] buffer = new string[array.Length];
-            buffer[0] = Convert.ToString(array[1], 16);
-            buffer[1] = Convert.ToString(array[0], 16);
-            buffer[2] = Convert.ToString(array[3], 16);
-            buffer[3] = Convert.ToString(array[2], 16);
+            // Изменить порядок байт согласно документации
+            byte[] buffer = new byte[array.Length];
+            buffer[0] = array[1];
+            buffer[1] = array[0];
+            buffer[2] = array[3];
+            buffer[3] = array[2];
 
-            for (int i = 0; i < buffer.Length; i++)
-                if (buffer[i].Length == 1)
-                    buffer[i] = "0" + buffer[i];
-            string hex = String.Join("", buffer);
-            int energy = Convert.ToInt32(hex, 16);
-            return energy / 1000.0d;
+            string hex = BytesToDecimalString(buffer);
+            Trace.WriteLine(hex);
+            return Convert.ToInt32(hex, 16) / 1000.0d;
         }
     }
 
@@ -109,15 +121,7 @@ namespace Mercury230Protocol
         {
             byte[] serialNumberBuffer = new byte[4];
             Array.Copy(response, 1, serialNumberBuffer, 0, 4);
-            string hex = "";
-            foreach (byte b in serialNumberBuffer) // TODO: Объедиить с GetEnergyValue
-            {
-                string s = Convert.ToString(b);
-                if (b / 10 == 0)
-                    s = "0" + s;
-                hex += s;
-            }
-            SerialNumber = hex;
+            SerialNumber = BytesToDecimalString(serialNumberBuffer);
 
             byte[] releaseDateBuffer = new byte[3];
             Array.Copy(response, 5, releaseDateBuffer, 0, 3);
