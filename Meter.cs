@@ -61,6 +61,16 @@ namespace Mercury230Protocol
             ConnectionTimer.Stop();
             return true;
         }
+        public bool ReadJournal(Journals j)
+        {
+            ReadJournalRecordRequest request = new ReadJournalRecordRequest(Address, j, 0);
+            Write(request);
+            ReadJournalResponse response = new ReadJournalResponse(Read());
+            if (response == null)
+                return false;
+            response.Print();
+            return true;
+        }
         public bool ReadStoredEnergy(DataArrays da, Months m, Rates r)
         {
             ReadStoredEnergyRequest request = new ReadStoredEnergyRequest(Address, da, m, r);
@@ -73,7 +83,7 @@ namespace Mercury230Protocol
         }
         public bool ReadSerialNumberAndReleaseDate()
         {
-            ReadSettingsRequest request = new ReadSettingsRequest(Address, Setting.SerialNumberAndReleaseDate, Array.Empty<byte>());
+            ReadSettingsRequest request = new ReadSettingsRequest(Address, Settings.SerialNumberAndReleaseDate, Array.Empty<byte>());
             Write(request);
             request.Print();
             SerialNumberAndReleaseDateResponse response = new SerialNumberAndReleaseDateResponse(Read());
@@ -84,7 +94,7 @@ namespace Mercury230Protocol
         }
         public bool ReadSoftwareVersion()
         {
-            ReadSettingsRequest request = new ReadSettingsRequest(Address, Setting.SoftwareVersion, Array.Empty<byte>());
+            ReadSettingsRequest request = new ReadSettingsRequest(Address, Settings.SoftwareVersion, Array.Empty<byte>());
             Write(request);
             SoftwareVersionResponse response = new SoftwareVersionResponse(Read());
             if (response == null)

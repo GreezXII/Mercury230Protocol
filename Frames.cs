@@ -71,6 +71,11 @@ namespace Mercury230Protocol
                 hex = "0" + hex;
             return hex;
         }
+        internal byte ByteToHexByte(byte b)
+        {
+            string hex = ByteToHexString(b);
+            return byte.Parse(hex);
+        }
     }
 
     class ReadStoredEnergyResponse : Response
@@ -152,6 +157,42 @@ namespace Mercury230Protocol
             {
                 SoftwareVersion += "." + buffer[i].ToString();
             }
+        }
+    }
+
+    class ReadJournalResponse : Response
+    {
+        public List<DateTime> Records { get; private set; } = new List<DateTime>();
+        public ReadJournalResponse(byte[] response)
+            : base(response)
+        {
+            byte[] buffer = new byte[6];
+            if (response.Length == 9)  // В ответе присутствует одна дата
+            {
+                Array.Copy(response, 1, buffer, 0, 6);
+                Records.Add(ParseDateTime(buffer));
+            }
+            if (response.Length == 15) // В ответе присутствует две даты
+            {
+                Array.Copy(response, 1, buffer, 0, 6);
+                Records.Add(ParseDateTime(buffer));
+                Array.Copy(response, 7, buffer, 0, 6);
+                Records.Add(ParseDateTime(buffer));
+            }
+            foreach (DateTime dt in Records)
+                Trace.WriteLine(dt);
+        }
+        private DateTime ParseDateTime(byte[] buffer)
+        {
+            byte year = ByteToHexByte(buffer[5]);
+            if (year == 0)
+                return default(DateTime);
+            byte month = ByteToHexByte(buffer[4]);
+            byte day = ByteToHexByte(buffer[3]);
+            byte hour = ByteToHexByte(buffer[2]);
+            byte minute = ByteToHexByte(buffer[1]);
+            byte second = ByteToHexByte(buffer[0]);
+            return new DateTime(2000 + year, month, day, hour, minute, second);
         }
     }
 
@@ -270,7 +311,7 @@ namespace Mercury230Protocol
         public byte ArrayMonth { get; private set; }
         public byte Rate { get; private set; }
         public ReadStoredEnergyRequest(byte addr, DataArrays dataArray, Months month, Rates rate)
-            :base(addr)
+            : base(addr)
         {
             RequestCode = (byte)RequestTypes.ReadArray;
             ArrayMonth = CombineHalfBytes((byte)dataArray, (byte)month);
@@ -289,13 +330,28 @@ namespace Mercury230Protocol
     {
         public byte SettingNumber { get; private set; }
         public byte[] Parameters { get; private set; }
-        public ReadSettingsRequest(byte addr, Setting sn, byte[] param)
-            :base(addr)
+        public ReadSettingsRequest(byte addr, Settings sn, byte[] param)
+            : base(addr)
         {
             RequestCode = (byte)RequestTypes.ReadSettings;
             SettingNumber = (byte)sn;
             Parameters = param;
             Pattern.AddRange(new string[] { "SettingNumber", "Parameters" });
+            Length += 2;
+        }
+    }
+
+    class ReadJournalRecordRequest : Request
+    {
+        public byte JournalNumber { get; private set; }
+        public byte RecordNumber { get; private set; }
+        public ReadJournalRecordRequest(byte addr, Journals j, byte n)
+            : base(addr)
+        {
+            RequestCode = (byte)RequestTypes.ReadJournal;
+            JournalNumber = (byte)j;
+            RecordNumber = n;
+            Pattern.AddRange(new string[] { "JournalNumber", "RecordNumber" });
             Length += 2;
         }
     }
