@@ -355,4 +355,29 @@ namespace Mercury230Protocol
             Length += 2;
         }
     }
+
+    class WriteRateScheduleRequest : Request
+    {
+        public WriteRateScheduleRequest(byte addr)
+            : base(addr)
+        {
+            RequestCode = (byte)RequestTypes.WriteSettings;
+            CreateTTF(Rates.First, 25);
+        }
+        private byte[] CreateTTF(Rates r, byte hour)
+        {
+            byte rate = (byte)r;
+            if (rate < 1 || rate > 3)  // Неверное значение тарифа
+                throw new Exception($"Выбрано неверное значение для тарифа в расписании тарифов: {rate}");
+            if (hour < 0 || hour > 24)
+                throw new Exception($"Выбрано неверное значение начала временного интервала тарифа: {hour}");
+
+            byte[] TTF = new byte[2];
+            TTF[0] = 0; // 0 указывает, что поминутная тарификация не используется
+            rate = (byte)(rate << 5);  // Перенести значение тарифа в старшие 3 бита
+            TTF[1] = (byte)(rate | hour);  // Объединить значение тарифа и часа начала интервала в одном байте
+            Trace.WriteLine(Convert.ToString(TTF[1], 2));
+            return TTF;
+        }
+    }
 }

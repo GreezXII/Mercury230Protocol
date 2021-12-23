@@ -31,13 +31,13 @@ namespace Mercury230Protocol
         {
             try
             {
-                Meter Mercury230 = new Meter(89, MeterAccessLevel.User, "111111");
+                //Meter Mercury230 = new Meter(89, MeterAccessLevel.User, "111111");
                 //Mercury230.TestLink();
-                Mercury230.OpenConnection();
-                
+                //Mercury230.OpenConnection();
 
+                WriteRateScheduleRequest request = new WriteRateScheduleRequest(89);
 
-                Mercury230.CloseConnection();
+                //Mercury230.CloseConnection();
             }
             catch (Exception exc)
             {

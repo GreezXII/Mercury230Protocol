@@ -14,6 +14,7 @@ namespace Mercury230Protocol
         ReadSettings = 0x08,    // Запрос на чтение параметров
         ReadJournal = 0x04,     // Запрос на чтение массивов времени (журналов)
         ReadArray = 0x05,       // Запрос на чтение массивов энергии в пределах 12 месяцев
+        WriteSettings = 0x3     // Запрос на запись параметров
     }
 
     enum Settings : byte
