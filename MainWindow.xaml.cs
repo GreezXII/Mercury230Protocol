@@ -31,11 +31,24 @@ namespace Mercury230Protocol
         {
             try
             {
-                //Meter Mercury230 = new Meter(89, MeterAccessLevel.User, "111111");
+                Meter Mercury230 = new Meter(89, MeterAccessLevel.User, "111111");
                 //Mercury230.TestLink();
                 //Mercury230.OpenConnection();
-
-                WriteRateScheduleRequest request = new WriteRateScheduleRequest(89);
+                List<TTF> TTFs = new List<TTF>();
+                TTFs.Add(new TTF(Rates.Rate2, 0));
+                TTFs.Add(new TTF(Rates.Rate1, 7));
+                TTFs.Add(new TTF(Rates.Rate3, 9));
+                TTFs.Add(new TTF(Rates.Rate1, 11));
+                TTFs.Add(new TTF(Rates.Rate3, 18));
+                TTFs.Add(new TTF(Rates.Rate1, 20));
+                TTFs.Add(new TTF(Rates.Rate2, 22));
+                TTFs.Add(new TTF(Rates.Rate1, 24));
+                MMSKH mm = new MMSKH();
+                mm.October = true;
+                WDPM dm = new WDPM();
+                dm.Tuesday = true;
+                TRECORDH recs = new TRECORDH(TTFs);
+                Mercury230.WriteRateSchedule(mm, dm, recs);
 
                 //Mercury230.CloseConnection();
             }

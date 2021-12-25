@@ -102,6 +102,14 @@ namespace Mercury230Protocol
             response.Print();
             return true;
         }
+        public bool WriteRateSchedule(MMSKH mm, WDPM dm, TRECORDH recs)
+        {
+            WriteRateScheduleRequest request = new WriteRateScheduleRequest(Address, mm, dm, recs);
+            byte[] req = request.Create();
+            foreach (byte b in req)
+                Trace.Write($"{Convert.ToString(b, 16)}-");
+            return true;
+        }
         private void Write(Request f)
         {
             byte[] buffer = f.Create();

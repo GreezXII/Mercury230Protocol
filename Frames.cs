@@ -358,26 +358,20 @@ namespace Mercury230Protocol
 
     class WriteRateScheduleRequest : Request
     {
-        public WriteRateScheduleRequest(byte addr)
+        public byte ParameterNumber { get; private set; }
+        public byte[] MMSKH { get; private set;   }   // Маска месяцев
+        public byte WDPM { get; private set; }        // Маска дней недели и праздников
+        public byte[] TRECORDH { get; private set; }  // Тарифные интервалы расписания
+        public WriteRateScheduleRequest(byte addr, MMSKH mm, WDPM dm, TRECORDH recs)
             : base(addr)
         {
             RequestCode = (byte)RequestTypes.WriteSettings;
-            CreateTTF(Rates.First, 25);
-        }
-        private byte[] CreateTTF(Rates r, byte hour)
-        {
-            byte rate = (byte)r;
-            if (rate < 1 || rate > 3)  // Неверное значение тарифа
-                throw new Exception($"Выбрано неверное значение для тарифа в расписании тарифов: {rate}");
-            if (hour < 0 || hour > 24)
-                throw new Exception($"Выбрано неверное значение начала временного интервала тарифа: {hour}");
-
-            byte[] TTF = new byte[2];
-            TTF[0] = 0; // 0 указывает, что поминутная тарификация не используется
-            rate = (byte)(rate << 5);  // Перенести значение тарифа в старшие 3 бита
-            TTF[1] = (byte)(rate | hour);  // Объединить значение тарифа и часа начала интервала в одном байте
-            Trace.WriteLine(Convert.ToString(TTF[1], 2));
-            return TTF;
+            ParameterNumber = 0x1D;
+            MMSKH = mm.Create();
+            WDPM = dm.Create();
+            TRECORDH = recs.Create();
+            Pattern.AddRange(new string[] { "ParameterNumber", "MMSKH", "WDPM", "TRECORDH" });
+            Length += 4;
         }
     }
     // Закодированные значения времени начала интервала и номера тарифа
@@ -394,7 +388,7 @@ namespace Mercury230Protocol
             if (Hour < 0 || Hour > 24)
                 throw new Exception($"Выбрано неверное значение начала временного интервала тарифа: {Hour}");
         }
-        public byte[] ToByteArray()
+        public byte[] Create()
         {
             byte[] TTF = new byte[2];
             TTF[0] = 0; // 0 указывает, что поминутная тарификация не используется
@@ -406,11 +400,11 @@ namespace Mercury230Protocol
     class TRECORDH
     {
         public List<TTF> Records = new List<TTF>(8);
-        public TRECORDH(TTF[] arrayTTF)
+        public TRECORDH(List<TTF> arrayTTF)
         {
-            if (arrayTTF.Length < 2)
+            if (arrayTTF.Count < 2)
                 throw new Exception("Неправильный формат записи интервалов: недостаточное количество записей.");
-            if (arrayTTF.Length > 8)
+            if (arrayTTF.Count > 8)
                 throw new Exception("Неправильный формат записи интервалов: слишком много записей.");
             
             Records.AddRange(arrayTTF);
@@ -418,27 +412,28 @@ namespace Mercury230Protocol
             
             if (Records.Count < 8)  // Дополнить значение до 16 байт
                 for (int i = Records.Count; i < 8; i++)
-                    Records.Add(new TTF(Rates.First, 24));
+                    Records.Add(new TTF(Rates.Rate1, 24));
 
             if (Records[0].Hour != 0)
                 throw new Exception("Неправильный формат записи интервалов: отсутствует запись на начало дня (0 часов)");
             if (Records[^1].Hour != 24)
                 throw new Exception("Неправильный формат записи интервалов: отсутствует запись на конец дня (24 часа)");
         }
-        public byte[] ToByteArray()
+        public byte[] Create()
         {
             byte[] buffer = new byte[16];
             int index = 0;
             byte[] ba = new byte[2];
             foreach (TTF ttf in Records)
             {
-                ba = ttf.ToByteArray();
+                ba = ttf.Create();
                 Array.Copy(ba, 0, buffer, index, 2);
                 index += 2;
             }
             return buffer;
         }
     }
+    // Маска дней недели и праздников  для чтения-записи тарифного расписания
     class WDPM
     {
         public bool Monday { get; set; }
@@ -450,7 +445,7 @@ namespace Mercury230Protocol
         public bool Sunday { get; set; }
         public bool Holiday { get; set; }
 
-        public byte ToByte()
+        public byte Create()
         {
             byte buffer = 0b0000_0000;
             if (Monday)
@@ -473,6 +468,7 @@ namespace Mercury230Protocol
             return buffer;
         }
     }
+    // Маска месяцев для чтения-записи тарифного расписания
     class MMSKH
     {
         public bool January { get; set; }
@@ -488,7 +484,7 @@ namespace Mercury230Protocol
         public bool November { get; set; }
         public bool December { get; set; }
 
-        public byte[] ToByte()
+        public byte[] Create()
         {
             byte b1 = 0b0000_0000;
             byte b2 = 0b0000_0000;

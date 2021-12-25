@@ -46,9 +46,9 @@ namespace Mercury230Protocol
     enum Rates : byte  // Тарифы
     {
         Sum,    // Сумма тарифов
-        First,  // Тариф 1
-        Second, // Тариф 2
-        Third,  // Тариф 3
+        Rate1,  // Тариф 1
+        Rate2, // Тариф 2
+        Rate3,  // Тариф 3
         Losses  // Тариф 4
     }
 
