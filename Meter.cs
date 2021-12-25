@@ -127,7 +127,7 @@ namespace Mercury230Protocol
         private void ConnectionExpired(object o, ElapsedEventArgs e)
         {
             if (AutoReconnect == true)
-                OpenConnection(); 
+                OpenConnection();
         }
     }
 }
