@@ -19,7 +19,7 @@ namespace Mercury230Protocol
     {
         public byte AccessLevel { get; private set; }
         public byte[] Password { get; private set; }
-        public OpenConnectionRequest(byte addr, MeterAccessLevel accLvl, string pwd)
+        public OpenConnectionRequest(byte addr, MeterAccessLevels accLvl, string pwd)
             : base(addr)
         {
             RequestCode = (byte)RequestTypes.OpenConnection;
@@ -248,6 +248,47 @@ namespace Mercury230Protocol
                 b1 = (byte)(b1 | 0b00001000);
 
             return new byte[] { b1, b2 };
+        }
+    }
+    class ChangePasswordRequest: Request
+    {
+        public byte ParameterNumber { get; private set; }
+        public byte AccessLevel { get; private set; }
+        public byte[] OldPassword { get; private set; }
+        public byte[] NewPassword { get; private set; }
+        public ChangePasswordRequest(byte addr, MeterAccessLevels al, string op, string np)
+            : base(addr)
+        {
+            if (op.Length != 6 || np.Length != 6)
+                throw new Exception("Пароль должен состоять из 6 символов.");
+            // Для пароля принимаются только цифры и буквы
+            for (int i = 0; i < op.Length; i++)
+                if (!char.IsLetterOrDigit(op[i]) || !char.IsLetterOrDigit(np[i]))
+                    throw new Exception("Пароль должен состоять только из букв и цифр.");
+            RequestCode = (byte)RequestTypes.WriteSettings;
+            ParameterNumber = 0x1F;
+            AccessLevel = (byte)al;
+            OldPassword = Encoding.ASCII.GetBytes(op);
+            NewPassword = Encoding.ASCII.GetBytes(np);
+            Pattern.AddRange(new string[] { "ParameterNumber", "AccessLevel", "OldPassword", "NewPassword" });
+            Length += 4;
+        }
+    }
+    class WriteLocationRequest : Request
+    {
+        public byte ParameterNumber { get; private set; }
+        public byte[] Location { get; private set; }
+        public WriteLocationRequest(byte addr, string loc)
+            : base(addr)
+        {
+            if (loc.Length < 0 || loc.Length > 4)
+                throw new Exception("Местоположение может содержать от 0 до 4 символов.");
+            RequestCode = (byte)RequestTypes.WriteSettings;
+            ParameterNumber = 0x22;
+            loc = loc.PadRight(4, ' ');
+            Location = Encoding.ASCII.GetBytes(loc);
+            Pattern.AddRange(new string[] { "ParameterNumber", "Location" });
+            Length += 2;
         }
     }
 }

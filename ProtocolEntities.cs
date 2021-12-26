@@ -14,13 +14,14 @@ namespace Mercury230Protocol
         ReadSettings = 0x08,    // Запрос на чтение параметров
         ReadJournal = 0x04,     // Запрос на чтение массивов времени (журналов)
         ReadArray = 0x05,       // Запрос на чтение массивов энергии в пределах 12 месяцев
-        WriteSettings = 0x3     // Запрос на запись параметров
+        WriteSettings = 0x03,   // Запрос на запись параметров
     }
 
     enum Settings : byte
     {
         SerialNumberAndReleaseDate = 0x00,  // Серийный номер и дата выпуска
-        SoftwareVersion = 0x03              // Версия ПО
+        SoftwareVersion = 0x03,             // Версия ПО
+        Location = 0x0B                     // Местоположение
     }
 
     enum Journals : byte
@@ -37,7 +38,7 @@ namespace Mercury230Protocol
         Phase3CurrentOnOff = 0x19         // Время включения и отключения тока фазы 3
     }
 
-    enum MeterAccessLevel : byte  // Уровень доступа к счётчику
+    enum MeterAccessLevels : byte  // Уровень доступа к счётчику
     {
         User = 0x01,
         Admin = 0x02

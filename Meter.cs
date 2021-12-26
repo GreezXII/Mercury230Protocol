@@ -13,14 +13,14 @@ namespace Mercury230Protocol
     {
         SerialPort Port = new SerialPort("COM1", 9600, Parity.None, 8, StopBits.One);
         public byte Address { get; set; }
-        public MeterAccessLevel AccessLevel { get; set; }
+        public MeterAccessLevels AccessLevel { get; set; }
         public string Password { get; private set; }
         private int WaitAnswerTime = 150;
         public bool AutoReconnect { get; set; }
         public bool IsConnected { get; private set; }
         private readonly System.Timers.Timer ConnectionTimer = new System.Timers.Timer() { Interval = 240000, AutoReset = true };
 
-        public Meter(byte addr, MeterAccessLevel al, string pwd, bool AutoReconnect = false)
+        public Meter(byte addr, MeterAccessLevels al, string pwd, bool AutoReconnect = false)
         {
             if (addr <= 0 || addr > 240)
                 throw new Exception($"Адрес счётчика {addr} является некорректным.");
@@ -75,7 +75,7 @@ namespace Mercury230Protocol
         {
             ReadStoredEnergyRequest request = new ReadStoredEnergyRequest(Address, da, m, r);
             Write(request);
-            ReadStoredEnergyResponse response = new ReadStoredEnergyResponse(Read()); 
+            ReadStoredEnergyResponse response = new ReadStoredEnergyResponse(Read());
             if (response == null)
                 return false;
             response.Print();
@@ -104,10 +104,40 @@ namespace Mercury230Protocol
         }
         public bool WriteRateSchedule(MMSKH mm, WDPM dm, TRECORDH recs)
         {
+            if (AccessLevel != MeterAccessLevels.Admin)  // TODO: ответ об административных правах на основе ответа счётчика
+                throw new Exception("Запись тарифного расписания требует административных прав.");
             WriteRateScheduleRequest request = new WriteRateScheduleRequest(Address, mm, dm, recs);
-            byte[] req = request.Create();
-            foreach (byte b in req)
-                Trace.Write($"{Convert.ToString(b, 16)}-");
+            Write(request);
+            Response response = new Response(Read());
+            return true;
+        }
+        public bool ChangePassword(MeterAccessLevels al, string op, string np)
+        {
+            // TODO: Проверка прав
+            ChangePasswordRequest request = new ChangePasswordRequest(Address, al, op, np);
+            request.Print();
+            Write(request);
+            Response response = new Response(Read());
+            response.Print();
+            return true;
+        }
+        public bool SetLocation(string loc)
+        {
+            WriteLocationRequest request = new WriteLocationRequest(Address, loc);
+            request.Print();
+            Write(request);
+            Response response = new Response(Read());
+            response.Print();
+            return true;
+        }
+        public bool GetLocation()
+        {
+            ReadSettingsRequest request = new ReadSettingsRequest(Address, Settings.Location, Array.Empty<byte>());
+            Write(request);
+            LocationResponse response = new LocationResponse(Read());
+            if (response == null)
+                return false;
+            response.Print();
             return true;
         }
         private void Write(Request f)
@@ -119,7 +149,7 @@ namespace Mercury230Protocol
         {
             Thread.Sleep(WaitAnswerTime);
             if (Port.BytesToRead == 0)
-                return null;
+                throw new Exception("Нет ответа от счётчика");
             byte[] buffer = new byte[Port.BytesToRead];
             Port.Read(buffer, 0, buffer.Length);
             return buffer;

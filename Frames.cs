@@ -18,14 +18,36 @@ namespace Mercury230Protocol
             Address = addr;
             Length = 3;
         }
-        public static bool CRCMatch(Frame a, Frame b)
+        internal byte[] CalculateCRC16Modbus(byte[] buffer)
+        {
+            ushort crc = 0xFFFF;
+
+            for (int pos = 0; pos < buffer.Length; pos++)
+            {
+                crc ^= (ushort)buffer[pos];
+
+                for (int i = 8; i != 0; i--)
+                {
+                    if ((crc & 0x0001) != 0)
+                    {
+                        crc >>= 1;
+                        crc ^= 0xA001;
+                    }
+                    else
+                        crc >>= 1;
+                }
+            }
+            CRC = BitConverter.GetBytes(crc);
+            return CRC;
+        }
+        public static bool CRCMatch(byte[] a, byte[] b)
         {
             if (a == null || b == null)
                 return false;
-            if (a.CRC.Length != b.CRC.Length)
+            if (a.Length != b.Length)
                 return false;
-            for (int i = 0; i < a.CRC.Length; i++)
-                if (a.CRC[i] != b.CRC[i])
+            for (int i = 0; i < a.Length; i++)
+                if (a[i] != b[i])
                     return false;
 
             return true;
@@ -46,6 +68,15 @@ namespace Mercury230Protocol
         {
             Address = response[0];
             CRC = new byte[] { response[^2], response[^1] };
+            if (!CheckCRC(response))
+                throw new Exception("CRC принятого пакета не совпадает с полученным значением CRC при проверке.");
+        }
+        private bool CheckCRC(byte[] response)
+        {
+            byte[] buffer = new byte[response.Length - 2];
+            Array.Copy(response, 0, buffer, 0, response.Length - 2);
+            byte[] CRCval = CalculateCRC16Modbus(buffer);
+            return CRCMatch(CRC, CRCval);
         }
         internal int FullHexToInt(byte[] buffer)
         {
@@ -78,7 +109,6 @@ namespace Mercury230Protocol
         }
     }
 
-  
     class Request : Frame
     {
         public byte RequestCode { get; internal set; }
@@ -91,8 +121,9 @@ namespace Mercury230Protocol
         public byte[] Create()
         {
             List<byte> frame = new List<byte>();
-            frame.AddRange(CreateBody());
-            CalculateCRC16Modbus();
+            byte[] body = CreateBody();
+            frame.AddRange(body);
+            CalculateCRC16Modbus(body);
             frame.AddRange(CRC);
             return frame.ToArray();
         }
@@ -117,29 +148,6 @@ namespace Mercury230Protocol
                         break;
                     }
             return body.ToArray();
-        }
-        internal byte[] CalculateCRC16Modbus()
-        {
-            byte[] buffer = CreateBody();
-            ushort crc = 0xFFFF;
-
-            for (int pos = 0; pos < buffer.Length; pos++)
-            {
-                crc ^= (ushort)buffer[pos];
-
-                for (int i = 8; i != 0; i--)
-                {
-                    if ((crc & 0x0001) != 0)
-                    {
-                        crc >>= 1;
-                        crc ^= 0xA001;
-                    }
-                    else
-                        crc >>= 1;
-                }
-            }
-            CRC = BitConverter.GetBytes(crc);
-            return CRC;
         }
         internal byte[] StringToBCD(string s)  // BCD - Binary-coded decimal
         {

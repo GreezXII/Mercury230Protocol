@@ -121,5 +121,15 @@ namespace Mercury230Protocol
             return new DateTime(2000 + year, month, day, hour, minute, second);
         }
     }
-
+    class LocationResponse : Response
+    {
+        public string Location { get; private set; }
+        public LocationResponse(byte[] response)
+            : base(response)
+        {
+            byte[] buffer = new byte[4];
+            Array.Copy(response, 1, buffer, 0, 4);
+            Location = Encoding.ASCII.GetString(buffer);
+        }
+    }
 }
