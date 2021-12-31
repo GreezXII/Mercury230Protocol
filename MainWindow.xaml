@@ -14,18 +14,21 @@
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="200"></ColumnDefinition>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <Label Content="HEX значение" Grid.Row="0" Grid.Column="0" Style="{StaticResource Default}"></Label>
-        <TextBox x:Name="hexTXT" Grid.Row="0" Grid.Column="1" Width="600" Style="{StaticResource Default}"></TextBox>
-        <Label Content="Результат: " Grid.Row="1" Grid.Column="0" Style="{StaticResource Default}"></Label>
-        <Label x:Name="ResultLBL" Content="" Grid.Row="1" Grid.Column="1" Style="{StaticResource Default}"></Label>
-        <Button x:Name="ApplyBTN" Content="Вычислить" Grid.Row="2" Grid.Column="1" Style="{StaticResource Default}" Click="ApplyBTN_Click"></Button>
+        <Button Grid.Row="0" Grid.Column="0">Соединение</Button>
+        <Button Grid.Row="1" Grid.Column="0">О счётчике</Button>
+        <Button Grid.Row="2" Grid.Column="0">Энергия</Button>
+        <Button Grid.Row="3" Grid.Column="0">Журналы</Button>
+        <Button Grid.Row="4" Grid.Column="0">Расписание</Button>
+        <Frame x:Name="MainFrame" Grid.Row="0" Grid.Column="1" Grid.RowSpan="6" Width="500"></Frame>
     </Grid>
 </Window>

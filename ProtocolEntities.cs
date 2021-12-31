@@ -48,7 +48,7 @@ namespace Mercury230Protocol
     {
         Sum,    // Сумма тарифов
         Rate1,  // Тариф 1
-        Rate2, // Тариф 2
+        Rate2,  // Тариф 2
         Rate3,  // Тариф 3
         Losses  // Тариф 4
     }

@@ -4,6 +4,9 @@
              xmlns:local="clr-namespace:Mercury230Protocol"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <Style x:Key="MainStyle">
+            <Setter Property="Control.Margin" Value="5, 5, 5, 5"></Setter>
+            <Setter Property="Control.VerticalContentAlignment" Value="Center"></Setter>
+        </Style>
     </Application.Resources>
 </Application>

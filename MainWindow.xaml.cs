@@ -24,46 +24,13 @@ namespace Mercury230Protocol
     {
         public MainWindow()
         {
+            App.Current.Properties["Meter"] = new Meter();
             InitializeComponent();
+            MainFrame.Content = new ConnectionFrame();
         }
-
         private void ApplyBTN_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                Meter Mercury230 = new Meter(89, MeterAccessLevels.Admin, "222222");
-                Mercury230.TestLink();
-                Mercury230.OpenConnection();
-                ResultLBL.Content = "Соединение открыто";
-                //List<TTF> TTFs = new List<TTF>();
-                //TTFs.Add(new TTF(Rates.Rate2, 0));
-                //TTFs.Add(new TTF(Rates.Rate1, 7));
-                //TTFs.Add(new TTF(Rates.Rate3, 9));
-                //TTFs.Add(new TTF(Rates.Rate1, 11));
-                //TTFs.Add(new TTF(Rates.Rate3, 18));
-                //TTFs.Add(new TTF(Rates.Rate1, 20));
-                //TTFs.Add(new TTF(Rates.Rate2, 22));
-                //TTFs.Add(new TTF(Rates.Rate1, 24));
-                //MMSKH mm = new MMSKH();
-                //mm.October = true;
-                //WDPM dm = new WDPM();
-                //dm.Tuesday = true;
-                //TRECORDH recs = new TRECORDH(TTFs);
-                //ResultLBL.Content = "Запись тарифного расписания.";
-                //Mercury230.WriteRateSchedule(mm, dm, recs);
-
-                //Mercury230.ChangePassword(MeterAccessLevels.User, "111111", "AAAAAA");
-                Mercury230.SetLocation("AAA");
-                Mercury230.GetLocation();
-
-                Mercury230.CloseConnection();
-                ResultLBL.Content = "Соединение закрыто.";
-            }
-            catch (Exception exc)
-            {
-                string message = $"Во время выполнения возникла следующая ошибка:\n{exc.Message}";
-                MessageBox.Show(message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            
         }
     }
 }

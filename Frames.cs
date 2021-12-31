@@ -70,6 +70,9 @@ namespace Mercury230Protocol
             CRC = new byte[] { response[^2], response[^1] };
             if (!CheckCRC(response))
                 throw new Exception("CRC принятого пакета не совпадает с полученным значением CRC при проверке.");
+            foreach (byte b in response)
+                Trace.Write($"{Convert.ToString(b, 16)} ");
+            Trace.WriteLine("");
         }
         private bool CheckCRC(byte[] response)
         {
