@@ -29,14 +29,14 @@
             <RadioButton GroupName="Interface" Content="TCP/IP" Grid.Row="1" Grid.Column="1" Click="RadioButton_Click_1" Style="{StaticResource MainStyle}"></RadioButton>
         </StackPanel>
         <Label Content="Адрес счётчика" Grid.Row="2" Grid.Column="0" Style="{StaticResource MainStyle}"></Label>
-        <TextBox x:Name="MeterNetworkAddressTB" Grid.Row="2" Grid.Column="1" Style="{StaticResource MainStyle}" PreviewKeyDown="MeterNetworkAddressTB_PreviewKeyDown"></TextBox>
+        <TextBox x:Name="MeterNetworkAddressTB" Text="89" Grid.Row="2" Grid.Column="1" Style="{StaticResource MainStyle}" PreviewKeyDown="MeterNetworkAddressTB_PreviewKeyDown"></TextBox>
         <Label Content="Уровень доступа" Grid.Row="3" Grid.Column="0" Style="{StaticResource MainStyle}"></Label>
         <ComboBox Name="AccessLevelsCB" Grid.Row="3" Grid.Column="1" SelectedIndex="0" Style="{StaticResource MainStyle}">
             <ComboBoxItem Content="Пользователь"></ComboBoxItem>
             <ComboBoxItem Content="Администратор"></ComboBoxItem>
         </ComboBox>
         <Label Content="Пароль" Grid.Row="4" Grid.Column="0" Style="{StaticResource MainStyle}"></Label>
-        <TextBox x:Name="MeterPasswordTB" Grid.Row="4" Grid.Column="1" Style="{StaticResource MainStyle}" Margin="4,5,6,5"></TextBox>
+        <PasswordBox x:Name="MeterPasswordTB" Password="111" Grid.Row="4" Grid.Column="1" Style="{StaticResource MainStyle}" Margin="4,5,6,5"></PasswordBox>
         <Label x:Name="ConnectionTypeLBL" Content="Номер порта" Grid.Row="5" Grid.Column="0" Style="{StaticResource MainStyle}"></Label>
         <ComboBox x:Name="ComPortCB" Grid.Row="5" Grid.Column="1" Visibility="Visible" Loaded="ComPortCB_Loaded" Style="{StaticResource MainStyle}"/>
         <DockPanel x:Name="TCPIPDockPanel" Grid.Row="5" Grid.Column="1" Visibility="Hidden">

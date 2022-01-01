@@ -21,6 +21,7 @@ namespace Mercury230Protocol
     /// </summary>
     public partial class ConnectionFrame : Page
     {
+        MainWindow MW = (MainWindow)Application.Current.MainWindow;
         public ConnectionFrame()
         {
             InitializeComponent();
@@ -86,19 +87,44 @@ namespace Mercury230Protocol
                 // Уровень доступа
                 MeterAccessLevels accessLevel = (MeterAccessLevels)(AccessLevelsCB.SelectedIndex + 1);
                 // Пароль
-                string pwd = MeterPasswordTB.Text;
+                string pwd = MeterPasswordTB.Password;
+                if (pwd.Length < 1 || pwd.Length > 6)
+                    throw new Exception("Пароль не может быть пустым или больше 6 символов.");
                 selectedItem = (ComboBoxItem)WaitTimeCB.SelectedItem;
                 // Время ожидания ответа
                 int waitTime = int.Parse(selectedItem.Content.ToString());
                 // Открыть соединение со счётчиком
+                Mouse.OverrideCursor = Cursors.Wait;
+                MW.UpdateStatusBar("Проверка физического подключения...");
                 Mercury230 = new Meter(addr, comPort, accessLevel, pwd, waitTime);
-                Mercury230.TestLink();
-                Mercury230.OpenConnection();
+                if (!Mercury230.TestLink())
+                {
+                    MW.UpdateStatusBar("Ошибка: проверка физического подключения не пройдена");
+                    throw new Exception("Проверка физического подключения не пройдена.");
+                }
+                MW.UpdateStatusBar("Попытка открыть соединение...");
+                if (!Mercury230.OpenConnection())
+                {
+                    MW.UpdateStatusBar("Ошибка: Не удалось установить соединение");
+                    throw new Exception("Не удалось установить соединение.");
+                }
+                MW.UpdateStatusBar("Соединение открыто");
+            }
+            catch (TimeoutException)
+            {
+                MW.UpdateStatusBar("Ошибка: невозможно установить соединение, проверьте настройки для подключения.");
+                string message = $"Невозможно установить соединение, проверьте настройки для подключения.";
+                MessageBox.Show(message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception exc)
             {
                 string message = $"Во время выполнения возникла следующая ошибка:\n{exc.Message}";
+                MW.UpdateStatusBar(exc.Message);
                 MessageBox.Show(message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                Mouse.OverrideCursor = Cursors.Arrow;
             }
         }
     }

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -22,15 +23,17 @@ namespace Mercury230Protocol
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static readonly Action EmptyDelegate = delegate { };
         public MainWindow()
         {
             App.Current.Properties["Meter"] = new Meter();
             InitializeComponent();
             MainFrame.Content = new ConnectionFrame();
         }
-        private void ApplyBTN_Click(object sender, RoutedEventArgs e)
+        public void UpdateStatusBar(string message)
         {
-            
+            StatusBar.Text = message;
+            StatusBar.Dispatcher.Invoke(DispatcherPriority.Render, EmptyDelegate);
         }
     }
 }

@@ -64,9 +64,12 @@ namespace Mercury230Protocol
 
     class Response : Frame
     {
+        public byte[] Body { get; private set; }
         public Response(byte[] response)
         {
             Address = response[0];
+            Body = new byte[response.Length - 3];
+            Array.Copy(response, 1, Body, 0, response.Length - 3);
             CRC = new byte[] { response[^2], response[^1] };
             if (!CheckCRC(response))
                 throw new Exception("CRC принятого пакета не совпадает с полученным значением CRC при проверке.");

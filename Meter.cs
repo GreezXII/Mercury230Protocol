@@ -12,6 +12,13 @@ namespace Mercury230Protocol
     class Meter
     {
         SerialPort Port;
+        public string PortName;
+        public int BaudRate;
+        public Parity PortParity;
+        public int DataBits;
+        public StopBits PortStopBits;
+        public int WriteTimeout;
+            
         public byte Address { get; set; }
         public MeterAccessLevels AccessLevel { get; set; }
         public string Password { get; private set; }
@@ -26,109 +33,111 @@ namespace Mercury230Protocol
             AccessLevel = al;
             Password = pwd;
             WaitAnswerTime = wt;
-            Port = new SerialPort(comPort, 9600, Parity.None, 8, StopBits.One);
-            Port.Open();
+
+            PortName = comPort;
+            BaudRate = 9600;
+            PortParity = Parity.None;
+            DataBits = 8;
+            PortStopBits = StopBits.One;
+            WriteTimeout = 10000;
+            Port = new SerialPort(PortName, BaudRate, PortParity, DataBits, PortStopBits);
         }
         public bool TestLink()
         {
             TestLinkRequest request = new TestLinkRequest(Address);
-            Write(request);
-            Response response = new Response(Read()); // TODO: response class?
-            if (response == null)
-                return false;
-            return true;
+            byte[] buffer = RunCommand(request);
+            Response response = new Response(buffer);
+            if (response.Body.Length == 1 && response.Body[0] == 0)
+                return true;
+            return false;
         }
         public bool OpenConnection()
         {
             OpenConnectionRequest request = new OpenConnectionRequest(Address, AccessLevel, Password);
-            Write(request);
-            Response response = new Response(Read()); // TODO: response class?
-            if (response == null)
-                return false;
-            return true;
+            byte[] buffer = RunCommand(request);
+            Response response = new Response(buffer);
+            if (response.Body.Length == 1 && response.Body[0] == 0)
+                return true;
+            return false;
         }
         public bool CloseConnection()
         {
             CloseConnectionRequest request = new CloseConnectionRequest(Address);
-            Write(request);
-            Response response = new Response(Read()); // TODO: response class?
-            if (response == null)
-                return false;
-            return true;
+            byte[] buffer = RunCommand(request);
+            Response response = new Response(buffer);
+            if (response.Body.Length == 1 && response.Body[0] == 0)
+                return true;
+            return false;
         }
-        public bool ReadJournal(Journals j)
+        public bool ReadJournal(Journals j)  // TODO: Возврат значения
         {
             ReadJournalRecordRequest request = new ReadJournalRecordRequest(Address, j, 0);
-            Write(request);
-            ReadJournalResponse response = new ReadJournalResponse(Read());
+            byte[] buffer = RunCommand(request);
+            ReadJournalResponse response = new ReadJournalResponse(buffer);
             if (response == null)
                 return false;
-            response.Print();
             return true;
         }
-        public bool ReadStoredEnergy(DataArrays da, Months m, Rates r)
+        public bool ReadStoredEnergy(DataArrays da, Months m, Rates r) //TODO: Возврат значения
         {
             ReadStoredEnergyRequest request = new ReadStoredEnergyRequest(Address, da, m, r);
-            Write(request);
-            ReadStoredEnergyResponse response = new ReadStoredEnergyResponse(Read());
+            byte[] buffer = RunCommand(request);
+            ReadStoredEnergyResponse response = new ReadStoredEnergyResponse(buffer);
             if (response == null)
                 return false;
-            response.Print();
             return true;
         }
-        public bool ReadSerialNumberAndReleaseDate()
+        public bool ReadSerialNumberAndReleaseDate() // TODO: Возврат значения
         {
             ReadSettingsRequest request = new ReadSettingsRequest(Address, Settings.SerialNumberAndReleaseDate, Array.Empty<byte>());
-            Write(request);
-            request.Print();
-            SerialNumberAndReleaseDateResponse response = new SerialNumberAndReleaseDateResponse(Read());
+            byte[] buffer = RunCommand(request);
+            SerialNumberAndReleaseDateResponse response = new SerialNumberAndReleaseDateResponse(buffer);
             if (response == null)
                 return false;
-            response.Print();
             return true;
         }
-        public bool ReadSoftwareVersion()
+        public bool ReadSoftwareVersion() // TODO: Возврат значения
         {
             ReadSettingsRequest request = new ReadSettingsRequest(Address, Settings.SoftwareVersion, Array.Empty<byte>());
-            Write(request);
-            SoftwareVersionResponse response = new SoftwareVersionResponse(Read());
+            byte[] buffer = RunCommand(request);
+            SoftwareVersionResponse response = new SoftwareVersionResponse(buffer);
             if (response == null)
                 return false;
             response.Print();
             return true;
         }
-        public bool SetLocation(string loc)
+        public bool SetLocation(string loc) // TODO: Возврат значения
         {
             WriteLocationRequest request = new WriteLocationRequest(Address, loc);
-            request.Print();
-            Write(request);
-            Response response = new Response(Read());
+            byte[] buffer = RunCommand(request);
+            Response response = new Response(buffer);
             response.Print();
             return true;
         }
-        public bool GetLocation()
+        public bool GetLocation() // Возврат значения
         {
             ReadSettingsRequest request = new ReadSettingsRequest(Address, Settings.Location, Array.Empty<byte>());
-            Write(request);
-            LocationResponse response = new LocationResponse(Read());
+            byte[] buffer = RunCommand(request);
+            LocationResponse response = new LocationResponse(buffer);
             if (response == null)
                 return false;
             response.Print();
             return true;
         }
-        private void Write(Request f)
+        private byte[] RunCommand(Request f)
         {
-            byte[] buffer = f.Create();
-            Port.Write(buffer, 0, buffer.Length);
-        }
-        private byte[] Read()
-        {
-            Thread.Sleep(WaitAnswerTime);
-            if (Port.BytesToRead == 0)
-                throw new Exception("Нет ответа от счётчика");
-            byte[] buffer = new byte[Port.BytesToRead];
-            Port.Read(buffer, 0, buffer.Length);
-            return buffer;
+            byte[] writeBuffer = f.Create();
+            using (Port)
+            {
+                Port.Open();
+                Port.Write(writeBuffer, 0, writeBuffer.Length);
+                Thread.Sleep(WaitAnswerTime);
+                byte[] readBuffer = new byte[Port.BytesToRead];
+                if (Port.BytesToRead == 0)
+                    throw new Exception("Нет ответа от счётчика.");
+                Port.Read(readBuffer, 0, readBuffer.Length);
+                return readBuffer;
+            }
         }
     }
 }
