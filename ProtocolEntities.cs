@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace Mercury230Protocol
 {
+    enum ConnectionTypes  // Типы подключения к счётчику
+    {
+        Com,  // Подключение по com-порту
+        TCP   // Подключение по TCP/IP
+    }
+
     enum RequestTypes : byte
     {
         TestConnection = 0x00,  // Тестирование канала связи
@@ -30,8 +36,6 @@ namespace Mercury230Protocol
         Phase1OnOff = 0x03,               // Время включения и выключения фазы 1
         Phase2OnOff = 0x04,               // Время включения и выключения фазы 2
         Phase3OnOff = 0x05,               // Время включения и выключения фазы 3
-        RatesScheduleCorrection = 0x07,   // Время коррекции тарифного расписания
-        HolidayScheduleCorrection = 0x08, // Время коррекции расписания праздничных дней
         OpeningClosing = 0x12,            // Время вскрытия и закрытия прибора
         Phase1CurrentOnOff = 0x17,        // Время включения и отключения тока фазы 1
         Phase2CurrentOnOff = 0x18,        // Время включения и отключения тока фазы 2
@@ -40,8 +44,8 @@ namespace Mercury230Protocol
 
     enum MeterAccessLevels : byte  // Уровень доступа к счётчику
     {
-        User = 0x01,
-        Admin = 0x02
+        User = 0x01,  // Пользователь
+        Admin = 0x02  // Администратор
     }
 
     enum Rates : byte  // Тарифы

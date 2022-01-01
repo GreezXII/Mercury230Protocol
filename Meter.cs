@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO.Ports;
-using System.Timers;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Threading;
+using System.Net.Sockets;
 using System.Linq;
 using System.Text;
 
@@ -11,21 +11,28 @@ namespace Mercury230Protocol
 {
     class Meter
     {
-        SerialPort Port;
+        // Тип подключения
+        public ConnectionTypes ConnectionType;
+        // Настройки для подключения по Com-порту
+        SerialPort ComPort;
         public string PortName;
-        public int BaudRate;
-        public Parity PortParity;
-        public int DataBits;
-        public StopBits PortStopBits;
-        public int WriteTimeout;
-            
+        public int BaudRate = 9600;
+        public Parity PortParity = Parity.None;
+        public int DataBits = 8;
+        public StopBits PortStopBits = StopBits.One;
+        public int WriteTimeout = 10000;
+        // Настройки для подключения по TCP/IP
+        public string IPAddress { get; set; }
+        public int TCPPort { get; set; }
+        public TcpClient TCPClient;
+        // Данные для счётчика
         public byte Address { get; set; }
         public MeterAccessLevels AccessLevel { get; set; }
         public string Password { get; private set; }
         private int WaitAnswerTime = 150;
 
         public Meter() { }
-        public Meter(byte addr, string comPort, MeterAccessLevels al, string pwd, int wt)
+        public Meter(byte addr, MeterAccessLevels al, string pwd, int wt)
         {
             if (addr <= 0 || addr > 240)
                 throw new Exception($"Адрес счётчика {addr} является некорректным.");
@@ -33,14 +40,35 @@ namespace Mercury230Protocol
             AccessLevel = al;
             Password = pwd;
             WaitAnswerTime = wt;
-
+        }
+        public Meter(byte addr, string comPort, MeterAccessLevels al, string pwd, int wt)
+            : this(addr, al, pwd, wt)
+        {
+            ConnectionType = ConnectionTypes.Com;
             PortName = comPort;
-            BaudRate = 9600;
-            PortParity = Parity.None;
-            DataBits = 8;
-            PortStopBits = StopBits.One;
-            WriteTimeout = 10000;
-            Port = new SerialPort(PortName, BaudRate, PortParity, DataBits, PortStopBits);
+            ComPort = new SerialPort(PortName, BaudRate, PortParity, DataBits, PortStopBits);
+        }
+        public Meter(byte addr, string ip, int tcpPort, MeterAccessLevels al, string pwd, int wt)
+            : this(addr, al, pwd, wt)
+        {
+            if (String.IsNullOrWhiteSpace(ip))
+                throw new Exception("Неверный формат IP адреса");
+
+            string[] splitValues = ip.Split('.');
+            if (splitValues.Length != 4)
+                throw new Exception("Неверное количество октетов в IP адресе");
+
+            byte tempForParsing;
+            if (!splitValues.All(r => byte.TryParse(r, out tempForParsing)))
+                throw new Exception("Неправильный формат IP адреса");
+
+            if (tcpPort < 0 || tcpPort > 65535)
+                throw new Exception("Неверное значение TCP порта");
+
+            ConnectionType = ConnectionTypes.TCP;
+            IPAddress = ip;
+            TCPPort = tcpPort;
+            TCPClient = new TcpClient();
         }
         public bool TestLink()
         {
@@ -124,20 +152,40 @@ namespace Mercury230Protocol
             response.Print();
             return true;
         }
-        private byte[] RunCommand(Request f)
+        private byte[] RunCommand(Request req)
         {
-            byte[] writeBuffer = f.Create();
-            using (Port)
+            byte[] writeBuffer = req.Create();
+            if (ConnectionType == ConnectionTypes.Com)
             {
-                Port.Open();
-                Port.Write(writeBuffer, 0, writeBuffer.Length);
+                using (ComPort)
+                {
+                    ComPort.Open();
+                    ComPort.Write(writeBuffer, 0, writeBuffer.Length);
+                    Thread.Sleep(WaitAnswerTime);
+                    byte[] readBuffer = new byte[ComPort.BytesToRead];
+                    if (ComPort.BytesToRead == 0)
+                        throw new Exception("Нет ответа от счётчика");
+                    ComPort.Read(readBuffer, 0, readBuffer.Length);
+                    return readBuffer;
+                }
+            }
+            if (ConnectionType == ConnectionTypes.TCP)
+            {
+                TCPClient.Connect(IPAddress, TCPPort);
+                NetworkStream ns = TCPClient.GetStream();
+                ns.WriteTimeout = 10000;
+
+                ns.Write(writeBuffer, 0, writeBuffer.Length);
                 Thread.Sleep(WaitAnswerTime);
-                byte[] readBuffer = new byte[Port.BytesToRead];
-                if (Port.BytesToRead == 0)
-                    throw new Exception("Нет ответа от счётчика.");
-                Port.Read(readBuffer, 0, readBuffer.Length);
+                byte[] readBuffer = new byte[req.ResponseLength];
+                int bytesReaded = ns.Read(readBuffer, 0, req.ResponseLength);
+                if (bytesReaded != req.ResponseLength)
+                    throw new Exception("Получено неверное количество байт");
+                TCPClient.Close();
                 return readBuffer;
             }
+            else
+                throw new Exception("Вызван неправильный тип соединения");
         }
     }
 }

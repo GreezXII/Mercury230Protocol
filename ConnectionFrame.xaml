@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Mercury230Protocol"
       mc:Ignorable="d" 
-      d:DesignHeight="280" d:DesignWidth="350"
+      d:DesignHeight="270" d:DesignWidth="330"
       Title="ConnectionFrame">
 
     <Grid>
@@ -24,9 +24,9 @@
             <ColumnDefinition Width="Auto"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Label Content="Интерфейс:" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource MainStyle}"></Label>
-        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-            <RadioButton GroupName="Interface" Content="RS-485" Grid.Row="1" Grid.Column="0" IsChecked="True" Click="SetComPortRB_Click" Style="{StaticResource MainStyle}"/>
-            <RadioButton GroupName="Interface" Content="TCP/IP" Grid.Row="1" Grid.Column="1" Click="RadioButton_Click_1" Style="{StaticResource MainStyle}"></RadioButton>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center">
+            <RadioButton x:Name="RS485RB" GroupName="Interface" Content="RS-485" Grid.Row="1" Grid.Column="0" IsChecked="True" Click="SetComPortRB_Click" Style="{StaticResource MainStyle}"/>
+            <RadioButton x:Name="TCPRB" GroupName="Interface" Content="TCP/IP" Grid.Row="1" Grid.Column="1" Click="RadioButton_Click_1" Style="{StaticResource MainStyle}"></RadioButton>
         </StackPanel>
         <Label Content="Адрес счётчика" Grid.Row="2" Grid.Column="0" Style="{StaticResource MainStyle}"></Label>
         <TextBox x:Name="MeterNetworkAddressTB" Text="89" Grid.Row="2" Grid.Column="1" Style="{StaticResource MainStyle}" PreviewKeyDown="MeterNetworkAddressTB_PreviewKeyDown"></TextBox>
@@ -40,8 +40,8 @@
         <Label x:Name="ConnectionTypeLBL" Content="Номер порта" Grid.Row="5" Grid.Column="0" Style="{StaticResource MainStyle}"></Label>
         <ComboBox x:Name="ComPortCB" Grid.Row="5" Grid.Column="1" Visibility="Visible" Loaded="ComPortCB_Loaded" Style="{StaticResource MainStyle}"/>
         <DockPanel x:Name="TCPIPDockPanel" Grid.Row="5" Grid.Column="1" Visibility="Hidden">
-            <TextBox x:Name="IPAddressTB" Width="100" Style="{StaticResource MainStyle}" PreviewKeyDown="IPAddressTB_PreviewKeyDown"></TextBox>
-            <TextBox x:Name="PortTB" Width="50" Style="{StaticResource MainStyle}" PreviewKeyDown="PortTB_PreviewKeyDown"></TextBox>
+            <TextBox x:Name="IPAddressTB" Text="172.16.0.2" Width="100" Style="{StaticResource MainStyle}" PreviewKeyDown="IPAddressTB_PreviewKeyDown"></TextBox>
+            <TextBox x:Name="PortTB" Text="1501" Width="50" Style="{StaticResource MainStyle}" PreviewKeyDown="PortTB_PreviewKeyDown"></TextBox>
         </DockPanel>
         <Label Content="Время ожидания ответа" Grid.Row="6" Grid.Column="0" Style="{StaticResource MainStyle}"></Label>
         <ComboBox Name="WaitTimeCB" Grid.Row="6" Grid.Column="1" SelectedIndex="0" Style="{StaticResource MainStyle}">

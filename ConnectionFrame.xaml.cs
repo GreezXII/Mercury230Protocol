@@ -80,23 +80,37 @@ namespace Mercury230Protocol
                 string addrString = MeterNetworkAddressTB.Text;
                 if (addrString.Length == 0)
                     throw new Exception("Поле адреса не может быть пустым.");
-                byte addr = byte.Parse(MeterNetworkAddressTB.Text);
-                // Com порт
-                ComboBoxItem selectedItem = (ComboBoxItem)ComPortCB.SelectedItem;
-                string comPort = selectedItem.Content.ToString();
                 // Уровень доступа
                 MeterAccessLevels accessLevel = (MeterAccessLevels)(AccessLevelsCB.SelectedIndex + 1);
                 // Пароль
                 string pwd = MeterPasswordTB.Password;
                 if (pwd.Length < 1 || pwd.Length > 6)
                     throw new Exception("Пароль не может быть пустым или больше 6 символов.");
-                selectedItem = (ComboBoxItem)WaitTimeCB.SelectedItem;
+                // Тип соединения
+                ComboBoxItem selectedWaitTime = (ComboBoxItem)WaitTimeCB.SelectedItem;
                 // Время ожидания ответа
-                int waitTime = int.Parse(selectedItem.Content.ToString());
+                int waitTime = int.Parse(selectedWaitTime.Content.ToString());
                 // Открыть соединение со счётчиком
+                byte addr = byte.Parse(MeterNetworkAddressTB.Text);
                 Mouse.OverrideCursor = Cursors.Wait;
                 MW.UpdateStatusBar("Проверка физического подключения...");
-                Mercury230 = new Meter(addr, comPort, accessLevel, pwd, waitTime);
+                // Тип соединения
+                if ((bool)RS485RB.IsChecked)  // Com порт
+                {
+                    ComboBoxItem selectedComPort = (ComboBoxItem)ComPortCB.SelectedItem;
+                    string comPort = selectedComPort.Content.ToString();
+                    Mercury230 = new Meter(addr, comPort, accessLevel, pwd, waitTime);
+                }
+                if ((bool)TCPRB.IsChecked)    // TCP/IP
+                {
+                    if (string.IsNullOrWhiteSpace(IPAddressTB.Text))
+                        throw new Exception("Не указан IP адрес");
+                    if (string.IsNullOrWhiteSpace(PortTB.Text))
+                        throw new Exception("Не указан номер порта");
+                    string ip = IPAddressTB.Text;
+                    int port = int.Parse(PortTB.Text);
+                    Mercury230 = new Meter(addr, ip, port, accessLevel, pwd, waitTime);
+                }
                 if (!Mercury230.TestLink())
                 {
                     MW.UpdateStatusBar("Ошибка: проверка физического подключения не пройдена");

@@ -51,6 +51,10 @@ namespace Mercury230Protocol
             Rate = (byte)rate;
             Pattern.AddRange(new string[] { "ArrayMonth", "Rate" });
             Length += 2;
+            if (dataArray == DataArrays.PerPhase)
+                ResponseLength = 15;
+            else
+                ResponseLength = 19;
         }
         private byte CombineHalfBytes(byte a, byte b)
         {
@@ -71,6 +75,12 @@ namespace Mercury230Protocol
             Parameters = param;
             Pattern.AddRange(new string[] { "SettingNumber", "Parameters" });
             Length += 2;
+            if (sn == Settings.SerialNumberAndReleaseDate)
+                ResponseLength = 10;
+            else if (sn == Settings.SoftwareVersion)
+                ResponseLength = 6;
+            else
+                ResponseLength = 7;
         }
     }
 
@@ -86,33 +96,10 @@ namespace Mercury230Protocol
             RecordNumber = n;
             Pattern.AddRange(new string[] { "JournalNumber", "RecordNumber" });
             Length += 2;
+            ResponseLength = 9;
         }
     }
 
-    class ChangePasswordRequest: Request
-    {
-        public byte ParameterNumber { get; private set; }
-        public byte AccessLevel { get; private set; }
-        public byte[] OldPassword { get; private set; }
-        public byte[] NewPassword { get; private set; }
-        public ChangePasswordRequest(byte addr, MeterAccessLevels al, string op, string np)
-            : base(addr)
-        {
-            if (op.Length != 6 || np.Length != 6)
-                throw new Exception("Пароль должен состоять из 6 символов.");
-            // Для пароля принимаются только цифры и буквы
-            for (int i = 0; i < op.Length; i++)
-                if (!char.IsLetterOrDigit(op[i]) || !char.IsLetterOrDigit(np[i]))
-                    throw new Exception("Пароль должен состоять только из букв и цифр.");
-            RequestCode = (byte)RequestTypes.WriteSettings;
-            ParameterNumber = 0x1F;
-            AccessLevel = (byte)al;
-            OldPassword = Encoding.ASCII.GetBytes(op);
-            NewPassword = Encoding.ASCII.GetBytes(np);
-            Pattern.AddRange(new string[] { "ParameterNumber", "AccessLevel", "OldPassword", "NewPassword" });
-            Length += 4;
-        }
-    }
     class WriteLocationRequest : Request
     {
         public byte ParameterNumber { get; private set; }

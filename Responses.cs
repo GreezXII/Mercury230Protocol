@@ -95,18 +95,10 @@ namespace Mercury230Protocol
             : base(response)
         {
             byte[] buffer = new byte[6];
-            if (response.Length == 9)  // В ответе присутствует одна дата
-            {
-                Array.Copy(response, 1, buffer, 0, 6);
-                Records.Add(ParseDateTime(buffer));
-            }
-            if (response.Length == 15) // В ответе присутствует две даты
-            {
-                Array.Copy(response, 1, buffer, 0, 6);
-                Records.Add(ParseDateTime(buffer));
-                Array.Copy(response, 7, buffer, 0, 6);
-                Records.Add(ParseDateTime(buffer));
-            }
+            Array.Copy(response, 1, buffer, 0, buffer.Length);
+            Records.Add(ParseDateTime(buffer));
+            Array.Copy(response, 7, buffer, 0, buffer.Length);
+            Records.Add(ParseDateTime(buffer));
         }
         private DateTime ParseDateTime(byte[] buffer)
         {
@@ -121,6 +113,7 @@ namespace Mercury230Protocol
             return new DateTime(2000 + year, month, day, hour, minute, second);
         }
     }
+    
     class LocationResponse : Response
     {
         public string Location { get; private set; }

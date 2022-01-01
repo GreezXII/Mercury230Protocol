@@ -118,11 +118,13 @@ namespace Mercury230Protocol
     class Request : Frame
     {
         public byte RequestCode { get; internal set; }
+        public int ResponseLength { get; internal set; }
         public Request(byte addr)
             : base(addr)
         {
             Length += 1;
             Pattern.Add("RequestCode");
+            ResponseLength = 4;
         }
         public byte[] Create()
         {
