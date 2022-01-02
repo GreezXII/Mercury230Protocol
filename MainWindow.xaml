@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Mercury230Protocol"
         mc:Ignorable="d"
-        Title="Протокол Меркурий 230" Height="450" Width="Auto">
+        Title="Протокол Меркурий 230" Height="450" Width="Auto"
+        WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <Style x:Key="Default">
             <Setter Property="Control.Margin" Value="10"></Setter>
@@ -15,8 +16,8 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
-                        <Border Background="{TemplateBinding Background}" BorderBrush="Black" BorderThickness="1">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border Background="{TemplateBinding Background}" BorderBrush="Black" BorderThickness="0 0 0 1">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10, 5, 5, 5"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -37,8 +38,8 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
-                        <Border Background="{TemplateBinding Background}" BorderBrush="Black" BorderThickness="1 1 0 1">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border Background="{TemplateBinding Background}" BorderBrush="Black" BorderThickness="0 0 0 1">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10, 5, 5, 5"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -63,11 +64,36 @@
             </StatusBarItem>
         </StatusBar>
         <StackPanel DockPanel.Dock="Left" Background="#292e34">
-            <Button Style="{StaticResource NavButtonSelected}">Соединение</Button>
-            <Button Style="{StaticResource NavButtonDefault}">О счётчике</Button>
-            <Button Style="{StaticResource NavButtonDefault}">Энергия</Button>
-            <Button Style="{StaticResource NavButtonDefault}">Журналы</Button>
-            <Button Style="{StaticResource NavButtonDefault}">Выход</Button>
+            <Button Style="{StaticResource NavButtonSelected}">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="{StaticResource LinkIcon}" Stretch="Fill" Width="20" Height="20"></Image>
+                    <TextBlock VerticalAlignment="Center" Text="Соединение" Margin="5"></TextBlock>
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource NavButtonDefault}">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="{StaticResource MeterIcon}" Stretch="Fill" Width="20" Height="20"></Image>
+                    <TextBlock VerticalAlignment="Center" Text="О счётчике" Margin="5"></TextBlock>
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource NavButtonDefault}">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="{StaticResource EnergyIcon}" Stretch="Fill" Width="20" Height="20"></Image>
+                    <TextBlock VerticalAlignment="Center" Text="Энергия" Margin="5"></TextBlock>
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource NavButtonDefault}">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="{StaticResource JournalIcon}" Stretch="Fill" Width="20" Height="20"></Image>
+                    <TextBlock VerticalAlignment="Center" Text="Журналы" Margin="5"></TextBlock>
+                </StackPanel>
+            </Button>
+            <Button Style="{StaticResource NavButtonDefault}">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="{StaticResource ExitIcon}" Stretch="Fill" Width="20" Height="20"></Image>
+                    <TextBlock VerticalAlignment="Center" Text="Выход" Margin="5"></TextBlock>
+                </StackPanel>
+            </Button>
         </StackPanel>
         <Frame x:Name="MainFrame" DockPanel.Dock="Right" Width="Auto"></Frame>
     </DockPanel>

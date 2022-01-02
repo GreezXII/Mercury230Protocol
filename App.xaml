@@ -30,5 +30,12 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <!-- Icons -->
+        <BitmapImage x:Key="LinkIcon" UriSource="pack://application:,,,/Icons/link.png"/>
+        <BitmapImage x:Key="MeterIcon" UriSource="pack://application:,,,/Icons/electric-meter.png"/>
+        <BitmapImage x:Key="EnergyIcon" UriSource="pack://application:,,,/Icons/lighting.png"/>
+        <BitmapImage x:Key="JournalIcon" UriSource="pack://application:,,,/Icons/journal.png"/>
+        <BitmapImage x:Key="ExitIcon" UriSource="pack://application:,,,/Icons/logout.png"/>
+
     </Application.Resources>
 </Application>
