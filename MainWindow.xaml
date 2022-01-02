@@ -63,38 +63,38 @@
                 <TextBlock Name="StatusBar" Text="Приложение готово к работе" Style="{StaticResource MainStyle}"></TextBlock>
             </StatusBarItem>
         </StatusBar>
-        <StackPanel DockPanel.Dock="Left" Background="#292e34">
-            <Button Style="{StaticResource NavButtonSelected}">
+        <StackPanel x:Name="NavigationPanel" DockPanel.Dock="Left" Background="#292e34">
+            <Button x:Name="ConnectionBTN" Style="{StaticResource NavButtonSelected}" Click="ConnectionBTN_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="{StaticResource LinkIcon}" Stretch="Fill" Width="20" Height="20"></Image>
                     <TextBlock VerticalAlignment="Center" Text="Соединение" Margin="5"></TextBlock>
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource NavButtonDefault}">
+            <Button x:Name="AboutMeterBTN" Style="{StaticResource NavButtonDefault}" Click="AboutMeterBTN_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="{StaticResource MeterIcon}" Stretch="Fill" Width="20" Height="20"></Image>
                     <TextBlock VerticalAlignment="Center" Text="О счётчике" Margin="5"></TextBlock>
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource NavButtonDefault}">
+            <Button x:Name="EnergyBTN" Style="{StaticResource NavButtonDefault}" Click="EnergyBTN_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="{StaticResource EnergyIcon}" Stretch="Fill" Width="20" Height="20"></Image>
                     <TextBlock VerticalAlignment="Center" Text="Энергия" Margin="5"></TextBlock>
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource NavButtonDefault}">
+            <Button x:Name="JournalBTN" Style="{StaticResource NavButtonDefault}" Click="JournalBTN_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="{StaticResource JournalIcon}" Stretch="Fill" Width="20" Height="20"></Image>
                     <TextBlock VerticalAlignment="Center" Text="Журналы" Margin="5"></TextBlock>
                 </StackPanel>
             </Button>
-            <Button Style="{StaticResource NavButtonDefault}">
+            <Button x:Name="ExitBTN" Style="{StaticResource NavButtonDefault}" Click="ExitBTN_Click">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="{StaticResource ExitIcon}" Stretch="Fill" Width="20" Height="20"></Image>
                     <TextBlock VerticalAlignment="Center" Text="Выход" Margin="5"></TextBlock>
                 </StackPanel>
             </Button>
         </StackPanel>
-        <Frame x:Name="MainFrame" DockPanel.Dock="Right" Width="Auto"></Frame>
+        <Frame NavigationUIVisibility="Hidden" x:Name="MainFrame" DockPanel.Dock="Right" Width="Auto"></Frame>
     </DockPanel>
 </Window>
