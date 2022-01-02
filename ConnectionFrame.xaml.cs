@@ -75,6 +75,8 @@ namespace Mercury230Protocol
         {
             try
             {
+                MW.UpdateStatusBar("Проверка физического подключения...");
+                Mouse.OverrideCursor = Cursors.Wait;
                 Meter Mercury230 = (Meter)App.Current.Properties["Meter"];
                 // Адрес
                 string addrString = MeterNetworkAddressTB.Text;
@@ -92,8 +94,6 @@ namespace Mercury230Protocol
                 int waitTime = int.Parse(selectedWaitTime.Content.ToString());
                 // Открыть соединение со счётчиком
                 byte addr = byte.Parse(MeterNetworkAddressTB.Text);
-                Mouse.OverrideCursor = Cursors.Wait;
-                MW.UpdateStatusBar("Проверка физического подключения...");
                 // Тип соединения
                 if ((bool)RS485RB.IsChecked)  // Com порт
                 {

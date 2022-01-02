@@ -6,7 +6,8 @@
       xmlns:local="clr-namespace:Mercury230Protocol"
       mc:Ignorable="d" 
       d:DesignHeight="270" d:DesignWidth="330"
-      Title="ConnectionFrame">
+      Title="ConnectionFrame"
+      Background="#f5f5f5">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -59,6 +60,6 @@
             <ComboBoxItem Content="25000"></ComboBoxItem>
             <ComboBoxItem Content="60000"></ComboBoxItem>
         </ComboBox>
-        <Button x:Name="ConnectBTN" Content="Соединить" Grid.Row="7" Grid.ColumnSpan="2" Width="200" Style="{StaticResource MainStyle}" Click="ConnectBTN_Click"></Button>
+        <Button x:Name="ConnectBTN" Content="Соединить" Grid.Row="7" Grid.ColumnSpan="2" Width="200" Style="{StaticResource ButtonDefault}" Click="ConnectBTN_Click"></Button>
     </Grid>
 </Page>

@@ -20,7 +20,7 @@ namespace Mercury230Protocol
         public Parity PortParity = Parity.None;
         public int DataBits = 8;
         public StopBits PortStopBits = StopBits.One;
-        public int WriteTimeout = 10000;
+        public int WriteTimeout = 5000;
         // Настройки для подключения по TCP/IP
         public string IPAddress { get; set; }
         public int TCPPort { get; set; }
@@ -47,6 +47,7 @@ namespace Mercury230Protocol
             ConnectionType = ConnectionTypes.Com;
             PortName = comPort;
             ComPort = new SerialPort(PortName, BaudRate, PortParity, DataBits, PortStopBits);
+            ComPort.WriteTimeout = WriteTimeout;
         }
         public Meter(byte addr, string ip, int tcpPort, MeterAccessLevels al, string pwd, int wt)
             : this(addr, al, pwd, wt)
