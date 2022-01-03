@@ -46,8 +46,6 @@ namespace Mercury230Protocol
         {
             ConnectionType = ConnectionTypes.Com;
             PortName = comPort;
-            ComPort = new SerialPort(PortName, BaudRate, PortParity, DataBits, PortStopBits);
-            ComPort.WriteTimeout = WriteTimeout;
         }
         public Meter(byte addr, string ip, int tcpPort, MeterAccessLevels al, string pwd, int wt)
             : this(addr, al, pwd, wt)
@@ -107,15 +105,12 @@ namespace Mercury230Protocol
                 return false;
             return true;
         }
-        public double[] ReadStoredEnergy(DataArrays da, Months m, Rates r) //TODO: Возврат значения
+        public ReadStoredEnergyResponse ReadStoredEnergy(DataArrays da, Months m, Rates r) //TODO: Возврат значения
         {
             ReadStoredEnergyRequest request = new ReadStoredEnergyRequest(Address, da, m, r);
             byte[] buffer = RunCommand(request);
             ReadStoredEnergyResponse response = new ReadStoredEnergyResponse(buffer, r);
-            if (response.IsPerPhase)
-                return new double[] { response.Phase1, response.Phase2, response.Phase3 };
-            else
-                return new double[] { response.ActivePositive, response.ActiveNegative, response.ReactivePositive, response.ReactiveNegative };
+            return response;
         }
         public bool ReadSerialNumberAndReleaseDate() // TODO: Возврат значения
         {
@@ -159,6 +154,9 @@ namespace Mercury230Protocol
             byte[] writeBuffer = req.Create();
             if (ConnectionType == ConnectionTypes.Com)
             {
+                ComPort = new SerialPort(PortName, BaudRate, PortParity, DataBits, PortStopBits);
+
+                ComPort.WriteTimeout = WriteTimeout;
                 using (ComPort)
                 {
                     ComPort.Open();

@@ -20,6 +20,7 @@ namespace Mercury230Protocol
     /// </summary>
     public partial class EnergyFrame : Page
     {
+        MainWindow MW = (MainWindow)Application.Current.MainWindow;
         class DataGridRow
         {
             public string Rate { get; private set; }
@@ -57,9 +58,9 @@ namespace Mercury230Protocol
                     if (r.Phase1 >= 0)
                         P1 = r.Phase1.ToString();
                     if (r.Phase2 >= 0)
-                        P1 = r.Phase2.ToString();
+                        P2 = r.Phase2.ToString();
                     if (r.Phase3 >= 0)
-                        P1 = r.Phase3.ToString();
+                        P3 = r.Phase3.ToString();
                 }
                 else
                 {
@@ -77,6 +78,7 @@ namespace Mercury230Protocol
         public EnergyFrame()
         {
             InitializeComponent();
+
             TotalEnergyDG.Items.Add(new DataGridRow("Тариф 1"));
             TotalEnergyDG.Items.Add(new DataGridRow("Тариф 2"));
             TotalEnergyDG.Items.Add(new DataGridRow("Тариф 3"));
@@ -105,5 +107,125 @@ namespace Mercury230Protocol
         {
             MonthsCB.IsEnabled = false;
         }
+
+        private void ReadTotalBTN_Click(object sender, RoutedEventArgs e)
+        {
+            MW.UpdateStatusBar("Чтение данных...");
+            Mouse.OverrideCursor = Cursors.Wait;
+            Meter Mercury230 = (Meter)App.Current.Properties["Meter"];
+
+            DataArrays da = DataArrays.FromReset;
+            Months m = Months.None;
+            if ((bool)ResetRB.IsChecked)
+                da = DataArrays.FromReset;
+            if ((bool)CurrentYearRB.IsChecked)
+                da = DataArrays.CurrentYear;
+            if ((bool)LastYearRB.IsChecked)
+                da = DataArrays.PastYear;
+            if ((bool)MonthsRB.IsChecked)
+            {
+                da = DataArrays.Month;
+                if (MonthsCB.Text == "Январь")
+                    m = Months.January;
+                if (MonthsCB.Text == "Февраль")
+                    m = Months.February;
+                if (MonthsCB.Text == "Март")
+                    m = Months.March;
+                if (MonthsCB.Text == "Апрель")
+                    m = Months.April;
+                if (MonthsCB.Text == "Май")
+                    m = Months.May;
+                if (MonthsCB.Text == "Июнь")
+                    m = Months.June;
+                if (MonthsCB.Text == "Июль")
+                    m = Months.July;
+                if (MonthsCB.Text == "Август")
+                    m = Months.August;
+                if (MonthsCB.Text == "Сентябрь")
+                    m = Months.September;
+                if (MonthsCB.Text == "Октябрь")
+                    m = Months.October;
+                if (MonthsCB.Text == "Ноябрь")
+                    m = Months.November;
+                if (MonthsCB.Text == "Декабрь")
+                    m = Months.December;
+            }
+            if ((bool)CurrentDayRB.IsChecked)
+                da = DataArrays.CurrentDay;
+            if ((bool)LastDayRB.IsChecked)
+                da = DataArrays.PastDay;
+
+            try
+            {
+                ReadStoredEnergyResponse rate1 = Mercury230.ReadStoredEnergy(da, m, Rates.Rate1);
+                ReadStoredEnergyResponse rate2 = Mercury230.ReadStoredEnergy(da, m, Rates.Rate2);
+                ReadStoredEnergyResponse rate3 = Mercury230.ReadStoredEnergy(da, m, Rates.Rate3);
+                ReadStoredEnergyResponse sum = Mercury230.ReadStoredEnergy(da, m, Rates.Sum);
+
+                TotalEnergyDG.Items.Clear();
+                TotalEnergyDG.Items.Add(new DataGridRow(rate1));
+                TotalEnergyDG.Items.Add(new DataGridRow(rate2));
+                TotalEnergyDG.Items.Add(new DataGridRow(rate3));
+                TotalEnergyDG.Items.Add(new DataGridRow(sum));
+                MW.UpdateStatusBar("Запрос выполнен");
+            }
+            catch (ArgumentNullException)
+            {
+                string message = $"Соединение не установлено или было сброшено, установите соединение заново";
+                MW.UpdateStatusBar(message);
+                MessageBox.Show(message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception exc)
+            {
+                string message = $"Во время выполнения возникла следующая ошибка:\n{exc.Message}";
+                MW.UpdateStatusBar(exc.Message);
+                MessageBox.Show(message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                Mouse.OverrideCursor = Cursors.Arrow;
+            }
+        }
+
+        private void ReadPerPhaseBTN_Click(object sender, RoutedEventArgs e)
+        {
+            MW.UpdateStatusBar("Чтение данных...");
+            Mouse.OverrideCursor = Cursors.Wait;
+            Meter Mercury230 = (Meter)App.Current.Properties["Meter"];
+
+            DataArrays da = DataArrays.PerPhase;
+            Months m = Months.None;
+            try
+            {
+                ReadStoredEnergyResponse phase1 = Mercury230.ReadStoredEnergy(da, m, Rates.Rate1);
+                ReadStoredEnergyResponse phase2 = Mercury230.ReadStoredEnergy(da, m, Rates.Rate2);
+                ReadStoredEnergyResponse phase3 = Mercury230.ReadStoredEnergy(da, m, Rates.Rate3);
+                ReadStoredEnergyResponse sum = Mercury230.ReadStoredEnergy(da, m, Rates.Sum);
+
+                PerPhaseDG.Items.Clear();
+                PerPhaseDG.Items.Add(new DataGridRow(phase1));
+                PerPhaseDG.Items.Add(new DataGridRow(phase2));
+                PerPhaseDG.Items.Add(new DataGridRow(phase3));
+                PerPhaseDG.Items.Add(new DataGridRow(sum));
+                MW.UpdateStatusBar("Запрос выполнен");
+            }
+            catch (ArgumentNullException)
+            {
+                string message = $"Соединение не установлено или было сброшено, установите соединение заново";
+                MW.UpdateStatusBar(message);
+                MessageBox.Show(message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception exc)
+            {
+                string message = $"Во время выполнения возникла следующая ошибка:\n{exc.Message}";
+                MW.UpdateStatusBar(exc.Message);
+                MessageBox.Show(message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                Mouse.OverrideCursor = Cursors.Arrow;
+            }
+        }
+
     }
 }

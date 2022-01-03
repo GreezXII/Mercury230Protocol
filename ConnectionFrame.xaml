@@ -37,7 +37,7 @@
             <ComboBoxItem Content="Администратор"></ComboBoxItem>
         </ComboBox>
         <Label Content="Пароль" Grid.Row="4" Grid.Column="0" Style="{StaticResource MainStyle}"></Label>
-        <PasswordBox x:Name="MeterPasswordTB" Password="111" Grid.Row="4" Grid.Column="1" Style="{StaticResource MainStyle}" Margin="4,5,6,5"></PasswordBox>
+        <PasswordBox x:Name="MeterPasswordTB" Password="111111" Grid.Row="4" Grid.Column="1" Style="{StaticResource MainStyle}" Margin="4,5,6,5"></PasswordBox>
         <Label x:Name="ConnectionTypeLBL" Content="Номер порта" Grid.Row="5" Grid.Column="0" Style="{StaticResource MainStyle}"></Label>
         <ComboBox x:Name="ComPortCB" Grid.Row="5" Grid.Column="1" Visibility="Visible" Loaded="ComPortCB_Loaded" Style="{StaticResource MainStyle}"/>
         <DockPanel x:Name="TCPIPDockPanel" Grid.Row="5" Grid.Column="1" Visibility="Hidden">

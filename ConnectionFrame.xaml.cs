@@ -100,6 +100,7 @@ namespace Mercury230Protocol
                     ComboBoxItem selectedComPort = (ComboBoxItem)ComPortCB.SelectedItem;
                     string comPort = selectedComPort.Content.ToString();
                     Mercury230 = new Meter(addr, comPort, accessLevel, pwd, waitTime);
+                    App.Current.Properties["Meter"] = Mercury230;
                 }
                 if ((bool)TCPRB.IsChecked)    // TCP/IP
                 {
@@ -110,6 +111,7 @@ namespace Mercury230Protocol
                     string ip = IPAddressTB.Text;
                     int port = int.Parse(PortTB.Text);
                     Mercury230 = new Meter(addr, ip, port, accessLevel, pwd, waitTime);
+                    App.Current.Properties["Meter"] = Mercury230;
                 }
                 if (!Mercury230.TestLink())
                 {

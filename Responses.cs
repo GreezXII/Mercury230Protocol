@@ -40,9 +40,9 @@ namespace Mercury230Protocol
                 byte[] buffer = new byte[4];
                 Array.Copy(response, 1, buffer, 0, 4);
                 Phase1 = GetEnergyValue(buffer);
-                Array.Copy(response, 1, buffer, 0, 4);
+                Array.Copy(response, 5, buffer, 0, 4);
                 Phase2 = GetEnergyValue(buffer);
-                Array.Copy(response, 1, buffer, 0, 4);
+                Array.Copy(response, 9, buffer, 0, 4);
                 Phase3 = GetEnergyValue(buffer);
             }
         }
