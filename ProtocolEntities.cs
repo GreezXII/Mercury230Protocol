@@ -54,7 +54,6 @@ namespace Mercury230Protocol
         Rate1,  // Тариф 1
         Rate2,  // Тариф 2
         Rate3,  // Тариф 3
-        Losses  // Тариф 4
     }
 
     enum Months : byte  // Месяцы

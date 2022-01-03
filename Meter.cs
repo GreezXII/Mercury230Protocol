@@ -107,14 +107,15 @@ namespace Mercury230Protocol
                 return false;
             return true;
         }
-        public bool ReadStoredEnergy(DataArrays da, Months m, Rates r) //TODO: Возврат значения
+        public double[] ReadStoredEnergy(DataArrays da, Months m, Rates r) //TODO: Возврат значения
         {
             ReadStoredEnergyRequest request = new ReadStoredEnergyRequest(Address, da, m, r);
             byte[] buffer = RunCommand(request);
-            ReadStoredEnergyResponse response = new ReadStoredEnergyResponse(buffer);
-            if (response == null)
-                return false;
-            return true;
+            ReadStoredEnergyResponse response = new ReadStoredEnergyResponse(buffer, r);
+            if (response.IsPerPhase)
+                return new double[] { response.Phase1, response.Phase2, response.Phase3 };
+            else
+                return new double[] { response.ActivePositive, response.ActiveNegative, response.ReactivePositive, response.ReactiveNegative };
         }
         public bool ReadSerialNumberAndReleaseDate() // TODO: Возврат значения
         {

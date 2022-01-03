@@ -15,11 +15,15 @@ namespace Mercury230Protocol
         public double Phase1 { get; private set; }
         public double Phase2 { get; private set; }
         public double Phase3 { get; private set; }
-        public ReadStoredEnergyResponse(byte[] response)
+        public bool IsPerPhase { get; private set; }
+        public Rates Rate { get; private set; }
+        public ReadStoredEnergyResponse(byte[] response, Rates r)
             : base(response)
         {
+            Rate = r;
             if (response.Length == 19)
             {
+                IsPerPhase = false;
                 byte[] buffer = new byte[4];
                 Array.Copy(response, 1, buffer, 0, 4);
                 ActivePositive = GetEnergyValue(buffer);
@@ -32,6 +36,7 @@ namespace Mercury230Protocol
             }
             if (response.Length == 15)
             {
+                IsPerPhase = true;
                 byte[] buffer = new byte[4];
                 Array.Copy(response, 1, buffer, 0, 4);
                 Phase1 = GetEnergyValue(buffer);
