@@ -72,7 +72,23 @@ namespace Mercury230Protocol
 
         private void ExitBTN_Click(object sender, RoutedEventArgs e)
         {
+            CloseConnection();
             this.Close();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            CloseConnection();
+        }
+        private void CloseConnection()
+        {
+            // Оборвать соединение со счётчиком перед выходом из приложения
+            try
+            {
+                Meter Mercury230 = (Meter)Application.Current.Properties["Meter"];
+                Mercury230.CloseConnection();
+            }
+            catch (Exception) { }
         }
     }
 }

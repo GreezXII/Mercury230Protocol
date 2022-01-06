@@ -13,25 +13,25 @@
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Серийный номер:"></Label>
-                    <Label x:Name="SerialNumberLBL" Width="100"></Label>
+                    <Label x:Name="SerialNumberLBL" Width="100" FontWeight="Bold"></Label>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Дата выпуска:"></Label>
-                    <Label x:Name="ReleaseDateLBL" Width="100"></Label>
+                    <Label x:Name="ReleaseDateLBL" Width="100" FontWeight="Bold"></Label>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="Версия прошивки:"></Label>
-                    <Label x:Name="SoftVersionLBL" Width="100"></Label>
+                    <Label x:Name="SoftVersionLBL" Width="100" FontWeight="Bold"></Label>
                 </StackPanel>
-                <Button x:Name="ReadInfoBTN" Content="Прочитать" Style="{StaticResource ButtonDefault}"></Button>
+                <Button x:Name="ReadInfoBTN" Content="Прочитать" Style="{StaticResource ButtonDefault}" Click="ReadInfoBTN_Click"></Button>
             </StackPanel>
         </GroupBox>
         <GroupBox Header="Местоположение">
             <StackPanel>
                 <TextBox x:Name="LocationTB" Width="100" Margin="5, 5, 5, 5"></TextBox>
                 <Label Content=""></Label>
-                <Button x:Name="ReadLocationBTN" Content="Прочитать" Style="{StaticResource ButtonDefault}"></Button>
-                <Button x:Name="WriteLocationBTN" Content="Записать" Style="{StaticResource ButtonDefault}"></Button>
+                <Button x:Name="ReadLocationBTN" Content="Прочитать" Style="{StaticResource ButtonDefault}" Click="ReadLocationBTN_Click"></Button>
+                <Button x:Name="WriteLocationBTN" Content="Записать" Style="{StaticResource ButtonDefault}" Click="WriteLocationBTN_Click"></Button>
             </StackPanel>
         </GroupBox>
     </StackPanel>

@@ -112,42 +112,37 @@ namespace Mercury230Protocol
             ReadStoredEnergyResponse response = new ReadStoredEnergyResponse(buffer, r);
             return response;
         }
-        public bool ReadSerialNumberAndReleaseDate() // TODO: Возврат значения
+        public SerialNumberAndReleaseDateResponse ReadSerialNumberAndReleaseDate()
         {
             ReadSettingsRequest request = new ReadSettingsRequest(Address, Settings.SerialNumberAndReleaseDate, Array.Empty<byte>());
             byte[] buffer = RunCommand(request);
             SerialNumberAndReleaseDateResponse response = new SerialNumberAndReleaseDateResponse(buffer);
-            if (response == null)
-                return false;
-            return true;
+            return response;
         }
-        public bool ReadSoftwareVersion() // TODO: Возврат значения
+        public string ReadSoftwareVersion()
         {
             ReadSettingsRequest request = new ReadSettingsRequest(Address, Settings.SoftwareVersion, Array.Empty<byte>());
             byte[] buffer = RunCommand(request);
             SoftwareVersionResponse response = new SoftwareVersionResponse(buffer);
-            if (response == null)
-                return false;
-            response.Print();
-            return true;
+            return response.SoftwareVersion;
         }
-        public bool SetLocation(string loc) // TODO: Возврат значения
+        public bool SetLocation(string loc)
         {
             WriteLocationRequest request = new WriteLocationRequest(Address, loc);
             byte[] buffer = RunCommand(request);
             Response response = new Response(buffer);
-            response.Print();
-            return true;
+            if (response.Body.Length == 1 && response.Body[0] == 0)
+                return true;
+            if (response.Body[0] == 3)
+                throw new Exception("Для выполения операции требуются права Администратора.");
+            return false;
         }
-        public bool GetLocation() // Возврат значения
+        public string GetLocation()
         {
             ReadSettingsRequest request = new ReadSettingsRequest(Address, Settings.Location, Array.Empty<byte>());
             byte[] buffer = RunCommand(request);
             LocationResponse response = new LocationResponse(buffer);
-            if (response == null)
-                return false;
-            response.Print();
-            return true;
+            return response.Location;
         }
         private byte[] RunCommand(Request req)
         {
