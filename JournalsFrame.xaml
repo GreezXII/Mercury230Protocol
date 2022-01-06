@@ -8,7 +8,33 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="JournalsFrame">
 
-    <Grid>
-        <Label Content="Журналы" FontSize="50"></Label>
-    </Grid>
+    <StackPanel Style="{StaticResource MainStyle}">
+        <StackPanel Orientation="Horizontal">
+            <GroupBox Header="Журналы" Margin="5, 5, 5, 5">
+                <DockPanel LastChildFill="True">
+                    <Button x:Name="ReadTotalBTN" Content="Прочитать" Style="{StaticResource ButtonDefault}" Width="200" DockPanel.Dock="Bottom" Click="ReadTotalBTN_Click"></Button>
+                    <StackPanel>
+                        <RadioButton x:Name="OnOffRB" GroupName="Arrays" Content="Время включения и отключения счётчика" Margin="0, 5, 0, 0" IsChecked="True"></RadioButton>
+                        <RadioButton x:Name="OpeningClosingRB" GroupName="Arrays" Content="Время вскрытия и закрытия счётчика"></RadioButton>
+                        <RadioButton x:Name="Phase1OnOffRB" GroupName="Arrays" Content="Время включения и отключения напрядения фазы 1"></RadioButton>
+                        <RadioButton x:Name="Phase2OnOffRB" GroupName="Arrays" Content="Время включения и отключения напрядения фазы 2"></RadioButton>
+                        <RadioButton x:Name="Phase3OnOffRB" GroupName="Arrays" Content="Время включения и отключения напрядения фазы 3"></RadioButton>
+                        <RadioButton x:Name="Phase1CurrentOnOffRB" GroupName="Arrays" Content="Время включения и отключения тока фазы 1"></RadioButton>
+                        <RadioButton x:Name="Phase2CurrentOnOffRB" GroupName="Arrays" Content="Время включения и отключения тока фазы 2"></RadioButton>
+                        <RadioButton x:Name="Phase3CurrentOnOffRB" GroupName="Arrays" Content="Время включения и отключения тока фазы 3"></RadioButton>
+                    </StackPanel>
+                </DockPanel>
+            </GroupBox>
+            <GroupBox Header="Время" Margin="5, 5, 5, 5">
+                <DockPanel>
+                    <DataGrid x:Name="TimeDG" IsReadOnly="True" DockPanel.Dock="Top">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn MinWidth="100" Header="Начальное время" Binding="{Binding Path=BeginTime}"></DataGridTextColumn>
+                            <DataGridTextColumn MinWidth="100" Header="Конечное время" Binding="{Binding Path=EndTime}"></DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </GroupBox>
+        </StackPanel>
+    </StackPanel>
 </Page>

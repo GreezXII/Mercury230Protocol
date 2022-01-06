@@ -96,16 +96,19 @@ namespace Mercury230Protocol
                 return true;
             return false;
         }
-        public bool ReadJournal(Journals j)  // TODO: Возврат значения
+        public List<DateTime> ReadJournal(Journals j)
         {
-            ReadJournalRecordRequest request = new ReadJournalRecordRequest(Address, j, 0);
-            byte[] buffer = RunCommand(request);
-            ReadJournalResponse response = new ReadJournalResponse(buffer);
-            if (response == null)
-                return false;
-            return true;
+            List<DateTime> records = new List<DateTime>();
+            for (byte i = 0; i < 10; i++)
+            {
+                ReadJournalRecordRequest request = new ReadJournalRecordRequest(Address, j, i);
+                byte[] buffer = RunCommand(request);
+                ReadJournalResponse response = new ReadJournalResponse(buffer);
+                records.AddRange(response.Records);
+            }
+            return records;
         }
-        public ReadStoredEnergyResponse ReadStoredEnergy(DataArrays da, Months m, Rates r) //TODO: Возврат значения
+        public ReadStoredEnergyResponse ReadStoredEnergy(DataArrays da, Months m, Rates r)
         {
             ReadStoredEnergyRequest request = new ReadStoredEnergyRequest(Address, da, m, r);
             byte[] buffer = RunCommand(request);

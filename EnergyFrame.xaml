@@ -11,8 +11,8 @@
     <StackPanel Style="{StaticResource MainStyle}">
         <StackPanel Orientation="Horizontal">
             <GroupBox Header="Общая" Margin="5, 5, 5, 5">
-                <StackPanel>
-                    <DataGrid x:Name="TotalEnergyDG" IsReadOnly="True">
+                <DockPanel LastChildFill="True">
+                    <DataGrid x:Name="TotalEnergyDG" IsReadOnly="True" DockPanel.Dock="Top">
                         <DataGrid.Columns>
                             <DataGridTextColumn MinWidth="80" Header="Тариф" Binding="{Binding Path=Rate}"></DataGridTextColumn>
                             <DataGridTextColumn MinWidth="80" Header="А+" Binding="{Binding Path=Ap}"></DataGridTextColumn>
@@ -21,17 +21,19 @@
                             <DataGridTextColumn MinWidth="80" Header="R-" Binding="{Binding Path=Rn}"></DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
-                    <RadioButton x:Name="ResetRB" GroupName="Arrays" Content="От сброса" Margin="0, 5, 0, 0" IsChecked="True"></RadioButton>
-                    <RadioButton x:Name="CurrentYearRB" GroupName="Arrays" Content="За текущий год"></RadioButton>
-                    <RadioButton x:Name="LastYearRB" GroupName="Arrays" Content="За предыдущий год"></RadioButton>
-                    <StackPanel Orientation="Horizontal">
-                        <RadioButton x:Name="MonthsRB" GroupName="Arrays" Content="За месяц" Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"></RadioButton>
-                        <ComboBox x:Name="MonthsCB" Height="15" Margin="10, 0, 0, 0" VerticalAlignment="Top" Width="100" FontSize="8" IsEnabled="False"></ComboBox>
+                    <Button x:Name="ReadTotalBTN" Content="Прочитать" Style="{StaticResource ButtonDefault}" Width="200" Click="ReadTotalBTN_Click" DockPanel.Dock="Bottom"></Button>
+                    <StackPanel>
+                        <RadioButton x:Name="ResetRB" GroupName="Arrays" Content="От сброса" Margin="0, 5, 0, 0" IsChecked="True"></RadioButton>
+                        <RadioButton x:Name="CurrentYearRB" GroupName="Arrays" Content="За текущий год"></RadioButton>
+                        <RadioButton x:Name="LastYearRB" GroupName="Arrays" Content="За предыдущий год"></RadioButton>
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton x:Name="MonthsRB" GroupName="Arrays" Content="За месяц" Checked="RadioButton_Checked" Unchecked="RadioButton_Unchecked"></RadioButton>
+                            <ComboBox x:Name="MonthsCB" Height="15" Margin="10, 0, 0, 0" VerticalAlignment="Top" Width="100" FontSize="8" IsEnabled="False"></ComboBox>
+                        </StackPanel>
+                        <RadioButton x:Name="CurrentDayRB" GroupName="Arrays" Content="За текущие сутки"></RadioButton>
+                        <RadioButton x:Name="LastDayRB" GroupName="Arrays" Content="За прошедшие сутки"></RadioButton>
                     </StackPanel>
-                    <RadioButton x:Name="CurrentDayRB" GroupName="Arrays" Content="За текущие сутки"></RadioButton>
-                    <RadioButton x:Name="LastDayRB" GroupName="Arrays" Content="За прошедшие сутки"></RadioButton>
-                    <Button x:Name="ReadTotalBTN" Content="Прочитать" Style="{StaticResource ButtonDefault}" Width="200" Click="ReadTotalBTN_Click"></Button>
-                </StackPanel>
+                </DockPanel>
             </GroupBox>
             <GroupBox Header="От сброса по фазам" Margin="5, 5, 5, 5">
                 <DockPanel>
