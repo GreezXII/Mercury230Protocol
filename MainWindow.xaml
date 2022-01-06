@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Mercury230Protocol"
         mc:Ignorable="d"
         Title="Протокол Меркурий 230" Height="450" Width="Auto"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen" Closing="Window_Closing">
     <Window.Resources>
         <Style x:Key="Default">
             <Setter Property="Control.Margin" Value="10"></Setter>
